@@ -17,6 +17,7 @@ const StopLabel: FC<StopLabelProps> = ({ name }) => (
     mb={4}         // Margin
     borderRadius="md" // Optional: Add rounded corners
     boxShadow="sm"
+    textAlign="left" // Center text alignment // TODO: add support for RTL languages
   >
     <Text fontWeight="bold">{name}</Text> {/* Using Text component for better semantics */}
   </Box>

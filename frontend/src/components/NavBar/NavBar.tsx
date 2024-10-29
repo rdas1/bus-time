@@ -10,6 +10,7 @@ const NavBar: React.FC = () => {
       width="100%"
       // bg="mtaColors.logoBlue" // Chakra UI blue color
       pt={4}        // Padding
+      pl={4}        // Padding
       color="white" // Text color
       textAlign="center" // Center text alignment
     >

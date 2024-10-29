@@ -14,16 +14,56 @@ interface BusStopDashboardProps {
   // direction?: string; // I think the database will take care of this, but will have to see
 }
 
-const getStopName = (stopcode: string): string => {
-  // Mock function to get the stop name based on the stop code
-  // TODO: update later with actual API call / config data read
-  return "W 125th St & 5th Ave";
+export interface RouteInfo {
+  route: string;
+  // stops?: StopInfo[]; // something like this?
+  // alerts?: AlertInfo[]; // something like this?
+  name: string;
+  destination: string;
+  // direction: number; 
 }
 
-const getRoutes = (stopcode: string): string[] => {
+export const getStopName = (stopcode: string): string => {
+  // Mock function to get the stop name based on the stop code
+  // TODO: update later with actual API call / config data read
+  return "W 125th St / 5th Ave";
+}
+
+export const getRoutes = (stopcode: string): string[] => {
   // Mock function to get the routes for a bus stop based on the stop code
   // TODO: update later with actual API call / config data read
   return ["M60-SBS", "M101", "M125"];
+}
+
+export const getRouteInfo = (route: string): RouteInfo => {
+  // Mock function to get the route info based on the route
+  // TODO: update later with actual API call / config data read
+  switch (route) {
+    case "M60-SBS":
+      return {
+        route: "M60-SBS",
+        name: "M60-SBS West Side - LaGuardia Airport",
+        destination: "LaGuardia Airport",
+      };
+    case "M101":
+      return {
+        route: "M101",
+        name: "M101 East Village - Fort George",
+        destination: "East Village",
+      };
+    case "M125":
+      return {
+        route: "M125",
+        name: "M125 Manhattanville - The Hub",
+        destination: "3 Av / 149 St",
+      };
+    default:
+      return {
+        route: "route",
+        name: "name",
+        destination: "destination",
+      };
+    }
 }
 
 const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopenedRoute }) => {

@@ -18,7 +18,6 @@ const StopCardsList: FC<StopCardsListProps> = ({routes, preopenedRoute}) => {
     ))}
   </Box>
   );
-  // TODO: Add "No routes found" if routes is empty
 }
 
 export default StopCardsList;

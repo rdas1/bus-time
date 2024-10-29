@@ -16,7 +16,7 @@ const AlertsSection: FC<AlertsSectionProps> = ({routes}) => {
         fontSize="xl" // Set font size (you can also use values like '2xl', etc.)
         px={3}         // Padding
       >
-        <Text fontWeight={"bold"}>Alerts:</Text> {/* Using Text component for better semantics */}      
+        <Text fontWeight={"bold"}>Service Alerts:</Text> {/* Using Text component for better semantics */}      
       </Box>
       <Box className={styles.routes} px={2}>
           {routes.map((route, index) => (

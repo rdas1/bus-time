@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 import styles from './StopCardsList.module.scss';
-import { Box } from '@chakra-ui/core';
+import { Box } from '@chakra-ui/react';
 import StopCard from '../StopCard/StopCard';
 
 interface StopCardsListProps {

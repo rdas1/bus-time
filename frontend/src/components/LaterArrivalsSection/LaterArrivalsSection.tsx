@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 import styles from './LaterArrivalsSection.module.scss';
-import { Box, Text } from '@chakra-ui/core';
+import { Box, Text } from '@chakra-ui/react';
 import StopCard from '../StopCard/StopCard';
 
 interface LaterArrivalsSectionProps {

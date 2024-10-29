@@ -1,6 +1,6 @@
 import React, { FC, useState } from 'react';
 import styles from './StopCard.module.scss';
-import { Box, Button, Text, Flex } from '@chakra-ui/core';
+import { Box, Button, Text, Flex } from '@chakra-ui/react';
 import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import { getRouteInfo, RouteInfo } from '../BusStopDashboard/BusStopDashboard';
 
@@ -25,20 +25,19 @@ const StopCard: FC<StopCardProps> = ({ route, preOpened = false }) => {
       className={styles.StopCard}
       borderRadius="10px"
       my={2}
-      boxShadow="lg"
+      boxShadow="md"
     >
       <Button
         height="70px"
-        variant="unstyled"
+        variant="plain"
         borderRadius="10px"
         width="100%"
-        p={0}
         onClick={toggleExpand}
       >
-        <Flex justify="space-between" align="center" px={4}>
+        <Flex justify="flex-start" align="center" px={4} maxW={"lg"}>
           
           {/* Left-aligned route name */}
-          <Flex direction="column" align="flex-start" minWidth="150px">
+          <Flex direction="column" align="flex-start" minW={40}>
             <Text fontSize="lg">{route}</Text>
             <Text fontSize="sm" fontWeight="lighter">to {routeInfo.destination}</Text>
           </Flex>
@@ -48,14 +47,15 @@ const StopCard: FC<StopCardProps> = ({ route, preOpened = false }) => {
             <Text fontSize="lg">5 min</Text>
             <Text fontSize="sm" fontWeight="lighter" color="gray.300">2 stops away</Text>
           </Flex>
-
-          {/* Expand/Collapse Icon */}
-          {isExpanded ? (
-            <FiChevronUp size={20} color="gray.600" />
-          ) : (
-            <FiChevronDown size={20} color="gray.600" />
-          )}
         </Flex>
+        <Box>
+            {/* Expand/Collapse Icon */}
+            {isExpanded ? (
+              <FiChevronUp size={20} color="gray.600" />
+            ) : (
+              <FiChevronDown size={20} color="gray.600" />
+            )}
+        </Box>
       </Button>
 
       {/* Expanded Content */}

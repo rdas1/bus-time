@@ -1,4 +1,4 @@
-import { Box } from '@chakra-ui/core';
+import { Box } from '@chakra-ui/react';
 import './App.css';
 import BusStopDashboard from './components/BusStopDashboard/BusStopDashboard';
 import NavBar from './components/NavBar/NavBar';

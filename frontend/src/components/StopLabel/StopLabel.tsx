@@ -1,6 +1,6 @@
 import React, { FC } from 'react';
 import styles from './StopLabel.module.scss';
-import { Box, Text } from '@chakra-ui/core';
+import { Box, Text } from '@chakra-ui/react';
 
 interface StopLabelProps {
   name?: string;

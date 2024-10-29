@@ -13,12 +13,12 @@ const LaterArrivalsSection: FC<LaterArrivalsSectionProps> = ({routes}) => {
     <Box>
       <Box  
         color="white" // Text color
-        fontSize="2xl" // Set font size (you can also use values like '2xl', etc.)
-        px={2}         // Padding
+        fontSize="xl" // Set font size (you can also use values like '2xl', etc.)
+        px={3}         // Padding
       >
         <Text fontWeight={"bold"}>Later Arrivals:</Text> {/* Using Text component for better semantics */}      
       </Box>
-      <Box className={styles.routes} px={1}>
+      <Box className={styles.routes} px={2}>
           {routes.map((route, index) => (
             <StopCard key={index} route={route}></StopCard>
           ))}

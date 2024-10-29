@@ -10,7 +10,7 @@ interface StopCardsListProps {
 const StopCardsList: FC<StopCardsListProps> = ({routes,}) => {
   routes = routes || [];
   return (
-  <Box className={styles.routes} px={1}>
+  <Box className={styles.routes} px={2}>
     {routes.map((route, index) => (
       <StopCard key={index} route={route}></StopCard>
     ))}

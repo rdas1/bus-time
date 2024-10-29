@@ -11,7 +11,7 @@ const StopLabel: FC<StopLabelProps> = ({ name }) => (
     bg="mtaColors.labelPurple" // You can use the exact color value or define it in your theme
     color="white" // Text color
     fontSize="2xl" // Set font size (you can also use values like '2xl', etc.)
-    px={4}         // Padding
+    px={3}         // Padding
     py={2}         // Padding
     my={2}         // Margin
     borderRadius="md" // Optional: Add rounded corners

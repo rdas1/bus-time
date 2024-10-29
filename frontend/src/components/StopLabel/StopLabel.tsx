@@ -7,13 +7,13 @@ interface StopLabelProps {
 }
 
 const StopLabel: FC<StopLabelProps> = ({ name }) => (
-  <Box
+  <Box  
     bg="mtaColors.labelPurple" // You can use the exact color value or define it in your theme
     color="white" // Text color
-    fontSize="xl" // Set font size (you can also use values like '2xl', etc.)
+    fontSize="2xl" // Set font size (you can also use values like '2xl', etc.)
     px={4}         // Padding
-    py={1}         // Padding
-    my={4}         // Margin
+    py={2}         // Padding
+    my={2}         // Margin
     borderRadius="md" // Optional: Add rounded corners
   >
     <Text fontWeight="bold">{name}</Text> {/* Using Text component for better semantics */}

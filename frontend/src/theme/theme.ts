@@ -1,6 +1,5 @@
 import { theme } from "@chakra-ui/core";
 
-// Let's say you want to add custom colors
 export default {
   ...theme,
   colors: {
@@ -9,11 +8,14 @@ export default {
         logoBlue: "#0039A6",
         labelPurple: "#8E44AD"
     },
-    brand: {
-      900: "#1a365d",
-      800: "#153e75",
-      700: "#2a69ac",
+    customColors: {
+      grayBackground: "#40414F", // dark gray
     },
+  },
+  fonts: {
+    heading: "Helvetica, Arial, sans-serif", // Font for headings
+    body: "Helvetica, Arial, sans-serif",    // Font for body text
+    mono: "Menlo, monospace",                // Monospace font
   },
 };
 

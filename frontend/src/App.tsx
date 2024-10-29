@@ -6,13 +6,14 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 function App() {
   const mockData = {
     stopcode: "402506",
-    name: "W 125th St and 5th Ave",
+    name: "W 125th St & 5th Ave",
+    routes: ["M60-SBS", "M101", "M125"],
     // Add more mock properties as needed
   };
 
   return (
     <Router>
-      <Box>
+      <Box className='top-container'>
         <NavBar />
         <Box className="main-content" px={4}> {/* Added padding for better spacing */}
           <Routes>

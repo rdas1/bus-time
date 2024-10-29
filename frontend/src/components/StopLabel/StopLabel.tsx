@@ -13,8 +13,10 @@ const StopLabel: FC<StopLabelProps> = ({ name }) => (
     fontSize="2xl" // Set font size (you can also use values like '2xl', etc.)
     px={3}         // Padding
     py={2}         // Padding
-    my={2}         // Margin
+    mt={2}         // Margin
+    mb={4}         // Margin
     borderRadius="md" // Optional: Add rounded corners
+    boxShadow="sm"
   >
     <Text fontWeight="bold">{name}</Text> {/* Using Text component for better semantics */}
   </Box>

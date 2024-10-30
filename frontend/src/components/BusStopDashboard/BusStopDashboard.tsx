@@ -26,7 +26,7 @@ export interface RouteInfo {
 export const getStopName = (stopcode: string): string => {
   // Mock function to get the stop name based on the stop code
   // TODO: update later with actual API call / config data read
-  return "W 125th St / 5th Ave";
+  return "West 125th St & 5th Ave";
 }
 
 export const getRoutes = (stopcode: string): string[] => {
@@ -55,7 +55,7 @@ export const getRouteInfo = (route: string): RouteInfo => {
       return {
         route: "M125",
         name: "M125 Manhattanville - The Hub",
-        destination: "3 Av / 149 St",
+        destination: "The Hub 3 Av / 149 St",
       };
     default:
       return {
@@ -64,7 +64,7 @@ export const getRouteInfo = (route: string): RouteInfo => {
         destination: "destination",
       };
     }
-}
+} 
 
 const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopenedRoute }) => {
   // Use the useParams hook to access the stopcode from the URL 

@@ -25,30 +25,31 @@ const StopCard: FC<StopCardProps> = ({ route, preOpened = false }) => {
       className={styles.StopCard}
       borderRadius="10px"
       my={2}
-      boxShadow="md"
+      boxShadow="sm"
     >
       <Button
-        height="70px"
+        h={24}
         variant="plain"
         borderRadius="10px"
         width="100%"
         onClick={toggleExpand}
       >
-        <Flex justify="flex-start" align="center" px={4} maxW={"lg"}>
+        <Flex justify="space-around" align="center" pl={4} >
           
           {/* Left-aligned route name */}
           <Flex direction="column" align="flex-start" minW={40}>
             <Text fontSize="lg">{route}</Text>
-            <Text fontSize="sm" fontWeight="lighter">to {routeInfo.destination}</Text>
+            <Text lineClamp={isExpanded ? 1 : 1} text-wrap="wrap" overflow={isExpanded ? "visible" : "hidden"} fontSize="sm" textAlign="left" fontWeight="300">to {routeInfo.destination}</Text>
           </Flex>
 
           {/* Right-aligned time info */}
-          <Flex direction="column" align="flex-end" textAlign="right" minWidth="60px">
+          <Flex direction="column" align="space-evenly" w={28} mx={1} pr={1}>
             <Text fontSize="lg">5 min</Text>
-            <Text fontSize="sm" fontWeight="lighter" color="gray.300">2 stops away</Text>
+            <Text fontSize="sm" fontWeight="300" color="gray.100">2 stops away</Text>
           </Flex>
         </Flex>
-        <Box>
+
+        <Box mr={2}>
             {/* Expand/Collapse Icon */}
             {isExpanded ? (
               <FiChevronUp size={20} color="gray.600" />

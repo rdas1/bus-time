@@ -2,9 +2,11 @@ import React, { FC } from 'react';
 import styles from './AlertsSection.module.scss';
 import { Box, Text } from '@chakra-ui/react';
 import StopCard from '../StopCard/StopCard';
+import { Arrival, RouteInfo } from '../BusStopDashboard/BusStopDashboard';
 
 interface AlertsSectionProps {
-  routes?: string[];
+  routes: RouteInfo[];
+  arrivalsData?: Record<string, Arrival[]>; // TODO: create types for this
 }
 
 const AlertsSection: FC<AlertsSectionProps> = ({routes}) => {

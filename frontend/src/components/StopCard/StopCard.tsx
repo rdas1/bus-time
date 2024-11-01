@@ -2,23 +2,52 @@ import React, { FC, useState } from 'react';
 import styles from './StopCard.module.scss';
 import { Box, Button, Text, Flex } from '@chakra-ui/react';
 import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
-import { getRouteInfo, RouteInfo } from '../BusStopDashboard/BusStopDashboard';
+import { RouteInfo, Arrival, getMinutesAway } from '../BusStopDashboard/BusStopDashboard';
 
 interface StopCardProps {
-  route?: string;
+  route?: RouteInfo;
+  arrivalsAlongRoute?: Arrival[];
   preOpened?: boolean;
 }
 
-const StopCard: FC<StopCardProps> = ({ route, preOpened = false }) => {
+const getMinutesAwayText = (arrivalData) => {  
+  // Actually, change to <30 seconds
+  if (arrivalData.distanceAwayMeters <= 30.48)  { // TODO: make constant (100ft in meters)
+    return "Now"
+  }
+  if (arrivalData.distanceAwayMeters < 152.4)  { // TODO: make constant (500ft in meters)
+    return "Approaching"
+  }
+  return `${getMinutesAway(arrivalData.arrivalTime)} min`
+}
+
+const getStopsAwayText = (arrivalData) => {
+  // Actually, change to <30 seconds
+  if (arrivalData.distanceAwayMeters <= 30.48)  { // TODO: make constant (100ft in meters)
+    return "At Stop"
+  }
+  if (arrivalData.distanceAwayMeters < 152.4)  { // TODO: make constant (500ft in meters)
+    return "Approaching"
+  }
+  if (arrivalData.stopsAway === 1) {
+    return "1 stop away";
+  }
+  return `${arrivalData.stopsAway} stops away`;
+}
+
+const StopCard: FC<StopCardProps> = ({ route, arrivalsAlongRoute, preOpened = false }) => {
   
-  route = route || ""; // TODO: handle invalid route
+  console.log(arrivalsAlongRoute);
+
+  route = route || {} as RouteInfo; // TODO: handle invalid route'
+  arrivalsAlongRoute = arrivalsAlongRoute || [] as Arrival[]; // TODO: handle invalid arrivals
+
+  const firstArrival = arrivalsAlongRoute[0] || {} as Arrival;
 
   // Initialize isExpanded based on preOpened prop
   const [isExpanded, setIsExpanded] = useState(preOpened);
 
   const toggleExpand = () => setIsExpanded(!isExpanded);
-
-  const routeInfo: RouteInfo = getRouteInfo(route);
 
   return (
     <Box 
@@ -38,14 +67,14 @@ const StopCard: FC<StopCardProps> = ({ route, preOpened = false }) => {
           
           {/* Left-aligned route name */}
           <Flex direction="column" align="flex-start" minW={40}>
-            <Text fontSize="lg">{route}</Text>
-            <Text lineClamp={isExpanded ? 1 : 1} text-wrap="wrap" overflow={isExpanded ? "visible" : "hidden"} fontSize="sm" textAlign="left" fontWeight="300">to {routeInfo.destination}</Text>
+            <Text fontSize="lg">{route.shortName}</Text> {/* TODO: Display blue pill icon for bus routes */}
+            <Text lineClamp={isExpanded ? 1 : 1} text-wrap="wrap" overflow={isExpanded ? "visible" : "hidden"} fontSize="sm" textAlign="left" fontWeight="300">to {route.destination}</Text>
           </Flex>
 
           {/* Right-aligned time info */}
           <Flex direction="column" align="space-evenly" w={28} mx={1} pr={1}>
-            <Text fontSize="lg">5 min</Text>
-            <Text fontSize="sm" fontWeight="300" color="gray.100">2 stops away</Text>
+            <Text fontSize="lg">{getMinutesAwayText(firstArrival)}</Text>
+            <Text fontSize="sm" fontWeight="300" color="gray.100">{getStopsAwayText(firstArrival)}</Text>
           </Flex>
         </Flex>
 

@@ -9,24 +9,24 @@ interface LaterArrivalsSectionProps {
   arrivalsData?: Record<string, Arrival[]>; // TODO: create types for this
 }
 
-const removeFirstArrival = (arrivalsData: Record<string, Arrival[]>): Record<string, Arrival[]> => {
-  console.warn("removeFirstArrival", arrivalsData);
-  const slicedArrivalsData = {};
-  for (const [key, value] of Object.entries(arrivalsData)) {
-    console.log(key, value);
-    slicedArrivalsData[key] = value.slice(1);
-  }
-  return slicedArrivalsData as Record<string, Arrival[]>;
-}
+// const removeFirstArrival = (arrivalsData: Record<string, Arrival[]>): Record<string, Arrival[]> => {
+//   // console.log("removeFirstArrival", arrivalsData);
+//   const slicedArrivalsData = {};
+//   for (const [key, value] of Object.entries(arrivalsData)) {
+//     console.log(key, value);
+//     slicedArrivalsData[key] = value.slice(1);
+//   }
+//   return slicedArrivalsData as Record<string, Arrival[]>;
+// }
 
 const LaterArrivalsSection: FC<LaterArrivalsSectionProps> = ({routes, arrivalsData}) => {
   routes = routes || [];
   arrivalsData = arrivalsData;
-  if (arrivalsData) {
-    console.log("arrivalsData before", Object.keys(arrivalsData));
-    arrivalsData = removeFirstArrival(arrivalsData);
-    console.log("arrivalsData after", arrivalsData);
-  }
+  // if (arrivalsData) {
+  //   console.log("arrivalsData before", Object.keys(arrivalsData));
+  //   arrivalsData = removeFirstArrival(arrivalsData);
+  //   console.log("arrivalsData after", arrivalsData);
+  // }
   return (
     <Box>
       <Box  
@@ -38,7 +38,7 @@ const LaterArrivalsSection: FC<LaterArrivalsSectionProps> = ({routes, arrivalsDa
       </Box>
       <Box className={styles.routes} px={2}>
         {routes.map((route, index) => (
-          <StopCard key={index} route={route} arrivalsAlongRoute={arrivalsData[route.shortName] || []}></StopCard>
+          <StopCard key={index} route={route} arrivalsAlongRoute={(arrivalsData[route.shortName])?.slice(1) || []}></StopCard>
         ))}
       </Box>
     </Box>

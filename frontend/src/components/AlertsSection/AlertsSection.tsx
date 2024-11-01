@@ -9,8 +9,9 @@ interface AlertsSectionProps {
   arrivalsData?: Record<string, Arrival[]>; // TODO: create types for this
 }
 
-const AlertsSection: FC<AlertsSectionProps> = ({routes}) => {
+const AlertsSection: FC<AlertsSectionProps> = ({routes, arrivalsData}) => {
   routes = routes || [];
+  arrivalsData = arrivalsData || {} as Record<string, Arrival[]>;
   return (
     <Box>
       <Box  
@@ -21,8 +22,8 @@ const AlertsSection: FC<AlertsSectionProps> = ({routes}) => {
         <Text fontWeight={"bold"}>Service Alerts:</Text> {/* Using Text component for better semantics */}      
       </Box>
       <Box className={styles.routes} px={2}>
-          {routes.map((route, index) => (
-            <StopCard key={index} route={route}></StopCard>
+          {routes.map((routeInfo, index) => (
+            <StopCard key={index} route={routeInfo} arrivalsAlongRoute={arrivalsData[routeInfo.shortName] || [] as Arrival[]}></StopCard>
           ))}
         </Box>
     </Box>

@@ -174,7 +174,7 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
   // Use the stopcode from props or fallback to a default value
   const stopCodeToUse = stopcode || "402506";
 
-  // Fetch stop info when the component mountss
+  // Fetch stop info when the component mounts
   useEffect(() => {
     const fetchStopInfo = async () => {
       try {

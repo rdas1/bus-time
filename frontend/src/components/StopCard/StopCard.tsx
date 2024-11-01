@@ -11,14 +11,15 @@ interface StopCardProps {
 }
 
 const getMinutesAwayText = (arrivalData) => {  
+  const minutesAway = getMinutesAway(arrivalData.arrivalTime);
   // Actually, change to <30 seconds
   if (arrivalData.distanceAwayMeters <= 30.48)  { // TODO: make constant (100ft in meters)
     return "Now"
   }
-  if (arrivalData.distanceAwayMeters < 152.4)  { // TODO: make constant (500ft in meters)
-    return "Approaching"
+  if (arrivalData.distanceAwayMeters < 152.4 || minutesAway == 0)  { // TODO: make constant (500ft in meters)
+    return "1 min"
   }
-  return `${getMinutesAway(arrivalData.arrivalTime)} min`
+  return `${minutesAway} min`
 }
 
 const getStopsAwayText = (arrivalData) => {

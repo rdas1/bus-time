@@ -10,6 +10,10 @@ interface StopCardProps {
   preOpened?: boolean;
 }
 
+const convertMetersToFeet = (meters: number) => {
+  return Math.floor(meters * 3.28084);
+}
+
 const getMinutesAwayText = (arrivalData) => {  
   const minutesAway = getMinutesAway(arrivalData.arrivalTime);
   // Actually, change to <30 seconds
@@ -17,7 +21,7 @@ const getMinutesAwayText = (arrivalData) => {
     return "Now"
   }
   if (arrivalData.distanceAwayMeters < 152.4 || minutesAway == 0)  { // TODO: make constant (500ft in meters)
-    return "1 min"
+    return "Approaching"
   }
   return `${minutesAway} min`
 }
@@ -28,7 +32,7 @@ const getStopsAwayText = (arrivalData) => {
     return "At Stop"
   }
   if (arrivalData.distanceAwayMeters < 152.4)  { // TODO: make constant (500ft in meters)
-    return "Approaching"
+    return `{convertMetersToFeet(arrivalData.distanceAwayMeters)} ft away`
   }
   if (arrivalData.stopsAway === 1) {
     return "1 stop away";
@@ -38,8 +42,6 @@ const getStopsAwayText = (arrivalData) => {
 
 const StopCard: FC<StopCardProps> = ({ route, arrivalsAlongRoute, preOpened = false }) => {
   
-  console.log(arrivalsAlongRoute);
-
   route = route || {} as RouteInfo; // TODO: handle invalid route'
   arrivalsAlongRoute = arrivalsAlongRoute || [] as Arrival[]; // TODO: handle invalid arrivals
 

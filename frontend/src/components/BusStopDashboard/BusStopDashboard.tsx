@@ -7,9 +7,6 @@ import StopCardsList from '../StopCardsList/StopCardsList';
 import LaterArrivalsSection from '../LaterArrivalsSection/LaterArrivalsSection';
 import AlertsSection from '../AlertsSection/AlertsSection';
 import axios from 'axios';
-import { parse } from 'path';
-
-
 
 interface BusStopDashboardProps {
   stopcode?: string; // Prop for the stopcode
@@ -22,6 +19,8 @@ export interface StopInfo {
   id: string;
   name: string;
   routes: RouteInfo[];
+  lat?: number;
+  lon?: number;
 }
 
 export interface RouteInfo {
@@ -77,12 +76,6 @@ export const getStopMonitoring = async (stopcode: string): Promise<any> => {
   }
 };
 
-export const getRoutes = (stopcode: string): string[] => {
-  // Mock function to get the routes for a bus stop based on the stop code
-  // TODO: update later with actual API call / config data read
-  return ["M60-SBS", "M101", "M125"];
-}
-
 const parseStopInfo = (stopInfoApiResponse): StopInfo => {
   return {
     id: stopInfoApiResponse.id,
@@ -96,7 +89,7 @@ const parseRoutes = (routesData: any): RouteInfo[] => {
   routesData = (routesData as any[]) || [];
   console.log("inside parseRoutes, routesData:", routesData);
   if (routesData[0] === undefined) { // TODO: check if this is the correct way to check if the array is empty
-    return [] as RouteInfo[];
+    return [] as RouteInfo[]; 
   }
   return routesData.map((route: any) => {
     return {
@@ -118,7 +111,7 @@ export const getMinutesAway = (arrivalTimeString: string): number => {
   const differenceInMs = arrivalTime.getTime() - currentTime.getTime();
 
   // Convert the difference from milliseconds to minutes
-  const differenceInMinutes = Math.floor(Math.abs(differenceInMs) / 1000 / 60); // TODO: figure out why this is negative sometimes
+  const differenceInMinutes = Math.round(differenceInMs / 1000 / 60); // TODO: figure out why this is negative sometimes
 
   return differenceInMinutes;
 };
@@ -160,7 +153,7 @@ const parseStopMonitoringResponse = (apiData): Record<string, Arrival[]> => {
     return groupByRoute;
   }, {} as Record<string, Arrival[]>);
 
-  console.log(parsed);
+  // console.log(parsed);
   return parsed;
 }
 
@@ -196,6 +189,7 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
 
   useEffect(() => {
     const fetchStopMonitoringData = async () => {
+      console.log("Fetching arrivals data...")
       try {
         const data = await getStopMonitoring(stopCodeToUse);
         setStopMonitoringData(parseStopMonitoringResponse(data));
@@ -210,20 +204,6 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
 
     return () => clearInterval(intervalId); // Cleanup interval on unmount
   }, [stopCodeToUse]);
-  
-  // Use the useParams hook to access the stopcode from the URL 
-  // stopcode = urlParams.stopcode || (stopcode ?? "402506"); // Use the stopcode from URL or fallback to prop
-  // TODO: check if stopcode is valid, if not, reroute to error page (maybe showing nearby stops?)
-  // stopcode = stopcode || "402506"; // Use the stopcode from URL or fallback to default value
-  // preopenedRoute = preopenedRoute?.toLocaleLowerCase() || ""; // Use the preopenedRoute from URL or fallback to empty string
-  
-  // const stopInfo = getStopInfo(stopcode);
-  // const stopName = stopInfo.data.name;
-
-  // console.log(getStopInfo(stopcode));
-
-  // const stopName = getStopName(stopcode);
-  // const routes: string[] = getRoutes(stopcode);
 
   return (
     <Box className={styles.container}>
@@ -232,7 +212,6 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
       <LaterArrivalsSection routes={stopInfo.routes} arrivalsData={stopMonitoringData}></LaterArrivalsSection>
       <AlertsSection routes={stopInfo.routes} arrivalsData={stopMonitoringData}></AlertsSection>
     </Box>
-
   );
 };
 

@@ -1,8 +1,11 @@
+import React from 'react';
 import { Box } from '@chakra-ui/react';
 import './App.css';
 import BusStopDashboard from './components/BusStopDashboard/BusStopDashboard';
 import NavBar from './components/NavBar/NavBar';
-import { BrowserRouter as Router, Routes, Route, useParams } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useParams } from 'react-router-dom';
+import 'leaflet/dist/leaflet.css';
+
 
 function App() {
   const mockData = {
@@ -14,7 +17,7 @@ function App() {
   };
 
   return (
-    <Router>
+    <BrowserRouter>
       <Box className='top-container'>
         <NavBar />
         <Box className="main-content" px={4}>
@@ -30,7 +33,7 @@ function App() {
           </Routes>
         </Box>
       </Box>
-    </Router>
+    </BrowserRouter>
   );
 };
 

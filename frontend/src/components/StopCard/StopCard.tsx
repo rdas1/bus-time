@@ -3,6 +3,7 @@ import styles from './StopCard.module.scss';
 import { Box, Button, Text, Flex } from '@chakra-ui/react';
 import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import { RouteInfo, Arrival, getMinutesAway } from '../BusStopDashboard/BusStopDashboard';
+import MapWidget from '../MapWidget/MapWidget';
 
 interface StopCardProps {
   route?: RouteInfo;
@@ -31,8 +32,8 @@ const getStopsAwayText = (arrivalData) => {
   if (arrivalData.distanceAwayMeters <= 30.48)  { // TODO: make constant (100ft in meters)
     return "At Stop"
   }
-  if (arrivalData.distanceAwayMeters < 152.4)  { // TODO: make constant (500ft in meters)
-    return `{convertMetersToFeet(arrivalData.distanceAwayMeters)} ft away`
+  if (arrivalData.distanceAwayMeters < 152.4 || arrivalData.numberOfStopsAway == 0)  { // TODO: make constant (500ft in meters)
+    return `${convertMetersToFeet(arrivalData.distanceAwayMeters)} ft away`
   }
   if (arrivalData.stopsAway === 1) {
     return "1 stop away";
@@ -93,8 +94,9 @@ const StopCard: FC<StopCardProps> = ({ route, arrivalsAlongRoute, preOpened = fa
 
       {/* Expanded Content */}
       {isExpanded && (
-        <Box mt={2} px={4} py={3} borderRadius="10px" bg="black">
-          <Text color="gray.600">Placeholder for embedded map or route details</Text>
+        <Box mt={2} px={4} py={3} borderRadius="10px">
+          {/* <Text color="gray.600">Placeholder for embedded map or route details</Text> */}
+          <MapWidget></MapWidget> 
         </Box>
       )}
     </Box>

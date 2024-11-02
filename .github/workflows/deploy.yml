@@ -16,16 +16,22 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '14'  # or your preferred Node version
+          node-version: '18.13.0'  # or your preferred Node version
 
       - name: Install dependencies
-        run: npm install
+        run: |
+          cd frontend  # Navigate to the frontend directory
+          npm install
 
       - name: Build
         env:
           BACKEND_API_URL: ${{ secrets.BACKEND_API_URL }}
-        run: npm run build
+        run: |
+          cd frontend  # Navigate to the frontend directory
+          npm run build
 
       - name: Deploy
-        run: npm run deploy
-
+        uses: JamesIArmes/github-pages-deploy-action@4.0.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./frontend/build  # Path to the build directory

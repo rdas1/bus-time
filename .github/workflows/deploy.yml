@@ -19,14 +19,14 @@ jobs:
           node-version: '20'  # Use Node.js 20
 
       - name: Install dependencies
-        run: npm install
         working-directory: frontend  # Navigate to the frontend directory
+        run: npm install
 
       - name: Build
         env:
           BACKEND_API_URL: ${{ secrets.BACKEND_API_URL }}
-        run: npm run build
         working-directory: frontend  # Navigate to the frontend directory
+        run: npm run build
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3

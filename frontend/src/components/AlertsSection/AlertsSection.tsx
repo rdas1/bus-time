@@ -2,16 +2,18 @@ import React, { FC } from 'react';
 import styles from './AlertsSection.module.scss';
 import { Box, Text } from '@chakra-ui/react';
 import StopCard from '../StopCard/StopCard';
-import { Arrival, RouteInfo } from '../BusStopDashboard/BusStopDashboard';
+import { Arrival, RouteInfo, StopInfo } from '../BusStopDashboard/BusStopDashboard';
 
 interface AlertsSectionProps {
   routes: RouteInfo[];
   arrivalsData?: Record<string, Arrival[]>; // TODO: create types for this
+  stopInfo?: StopInfo;
 }
 
-const AlertsSection: FC<AlertsSectionProps> = ({routes, arrivalsData}) => {
+const AlertsSection: FC<AlertsSectionProps> = ({routes, arrivalsData, stopInfo}) => {
   routes = routes || [];
   arrivalsData = arrivalsData || {} as Record<string, Arrival[]>;
+  stopInfo = stopInfo || {} as StopInfo;
   return (
     <Box>
       <Box  
@@ -23,7 +25,7 @@ const AlertsSection: FC<AlertsSectionProps> = ({routes, arrivalsData}) => {
       </Box>
       <Box className={styles.routes} px={2}>
           {routes.map((routeInfo, index) => (
-            <StopCard key={index} route={routeInfo} arrivalsAlongRoute={arrivalsData[routeInfo.shortName] || [] as Arrival[]}></StopCard>
+            <StopCard key={index} route={routeInfo} arrivalsAlongRoute={arrivalsData[routeInfo.shortName] || [] as Arrival[]} stopInfo={stopInfo}></StopCard>
           ))}
         </Box>
     </Box>

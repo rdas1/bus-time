@@ -8,7 +8,8 @@ import LaterArrivalsSection from '../LaterArrivalsSection/LaterArrivalsSection';
 import AlertsSection from '../AlertsSection/AlertsSection';
 import axios from 'axios';
 
-const API_BASE_URL = process.env.API_BASE_URL || "127:0.0.1:5000";
+const API_BASE_URL = process.env.API_BASE_URL || "http://127.0.0.1:5000";
+console.log("API_BASE_URL: ", API_BASE_URL);
 
 interface BusStopDashboardProps {
   stopcode?: string; // Prop for the stopcode
@@ -58,6 +59,7 @@ export const getStopName = (stopcode: string): string => {
 
 export const getStopInfo = async (stopcode: string): Promise<any> => {
   try {
+    // console.warn(stopcode);
     const response = await axios.get(`${API_BASE_URL}/api/stop/${stopcode}/info`);
     return response.data.data; // Axios automatically parses JSON
   } catch (error) {
@@ -214,8 +216,8 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
     <Box className={styles.container}>
       <StopLabel name={stopInfo.name}></StopLabel>
       <StopCardsList routes={stopInfo.routes} arrivalsData={stopMonitoringData} preopenedRoute={preopenedRoute} stopInfo={stopInfo}></StopCardsList>
-      <LaterArrivalsSection routes={stopInfo.routes} arrivalsData={stopMonitoringData}></LaterArrivalsSection>
-      <AlertsSection routes={stopInfo.routes} arrivalsData={stopMonitoringData}></AlertsSection>
+      <LaterArrivalsSection routes={stopInfo.routes} arrivalsData={stopMonitoringData} stopInfo={stopInfo}></LaterArrivalsSection>
+      <AlertsSection routes={stopInfo.routes} arrivalsData={stopMonitoringData} stopInfo={stopInfo}></AlertsSection>
     </Box>
   );
 };

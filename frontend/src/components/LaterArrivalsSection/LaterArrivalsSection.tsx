@@ -2,11 +2,12 @@ import React, { FC } from 'react';
 import styles from './LaterArrivalsSection.module.scss';
 import { Box, Text } from '@chakra-ui/react';
 import StopCard from '../StopCard/StopCard';
-import { Arrival, RouteInfo } from '../BusStopDashboard/BusStopDashboard';
+import { Arrival, RouteInfo, StopInfo } from '../BusStopDashboard/BusStopDashboard';
 
 interface LaterArrivalsSectionProps {
   routes?: RouteInfo[];
   arrivalsData?: Record<string, Arrival[]>; // TODO: create types for this
+  stopInfo?: StopInfo;
 }
 
 // const removeFirstArrival = (arrivalsData: Record<string, Arrival[]>): Record<string, Arrival[]> => {
@@ -19,9 +20,10 @@ interface LaterArrivalsSectionProps {
 //   return slicedArrivalsData as Record<string, Arrival[]>;
 // }
 
-const LaterArrivalsSection: FC<LaterArrivalsSectionProps> = ({routes, arrivalsData}) => {
+const LaterArrivalsSection: FC<LaterArrivalsSectionProps> = ({routes, arrivalsData, stopInfo}) => {
   routes = routes || [];
-  arrivalsData = arrivalsData;
+  arrivalsData = arrivalsData || {} as Record<string, Arrival[]>;
+  stopInfo = stopInfo || {} as StopInfo;
   // if (arrivalsData) {
   //   console.log("arrivalsData before", Object.keys(arrivalsData));
   //   arrivalsData = removeFirstArrival(arrivalsData);
@@ -38,7 +40,7 @@ const LaterArrivalsSection: FC<LaterArrivalsSectionProps> = ({routes, arrivalsDa
       </Box>
       <Box className={styles.routes} px={2}>
         {routes.map((route, index) => (
-          <StopCard key={index} route={route} arrivalsAlongRoute={(arrivalsData[route.shortName])?.slice(1) || []}></StopCard>
+          <StopCard key={index} route={route} arrivalsAlongRoute={(arrivalsData[route.shortName])?.slice(1) || []} stopInfo={stopInfo}></StopCard>
         ))}
       </Box>
     </Box>

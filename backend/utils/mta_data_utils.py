@@ -1,8 +1,9 @@
 import requests
-from __main__ import app
 from constants import STOP_MONITORING_URL, OPERATOR_REF, MTA_API_VERSION, MINIMUM_STOP_VISITS_PER_LINE, STOPS_ALONG_ROUTE_URL, STOP_STATIC_INFO_URL
+import os
 
-MTA_API_KEY = app.config["MTA_API_KEY"]
+MTA_API_KEY = os.getenv("MTA_API_KEY")
+# MTA_API_KEY = app.config["MTA_API_KEY"]
 
 def get_stops_along_route(route_id, include_polylines=False):
     url = STOPS_ALONG_ROUTE_URL.format(route_id=route_id)

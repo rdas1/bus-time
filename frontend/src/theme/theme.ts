@@ -6,7 +6,6 @@ const customConfig = defineConfig({
             colors: {
                 mtaColors: {
                     logoBlue: {value: "#0039A6"},
-                    labelPurple: {value: "#8E44AD"},
                     labelPurple: {value: "#712e8c"},
                     // labelPurple: {value: "indigo"}, 
                 },

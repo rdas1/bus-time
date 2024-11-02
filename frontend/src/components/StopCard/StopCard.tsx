@@ -2,13 +2,14 @@ import React, { FC, useState } from 'react';
 import styles from './StopCard.module.scss';
 import { Box, Button, Text, Flex } from '@chakra-ui/react';
 import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
-import { RouteInfo, Arrival, getMinutesAway } from '../BusStopDashboard/BusStopDashboard';
+import { RouteInfo, Arrival, getMinutesAway, StopInfo } from '../BusStopDashboard/BusStopDashboard';
 import MapWidget from '../MapWidget/MapWidget';
 
 interface StopCardProps {
   route?: RouteInfo;
   arrivalsAlongRoute?: Arrival[];
   preOpened?: boolean;
+  stopInfo?: StopInfo;
 }
 
 const convertMetersToFeet = (meters: number) => {
@@ -41,11 +42,14 @@ const getStopsAwayText = (arrivalData) => {
   return `${arrivalData.stopsAway} stops away`;
 }
 
-const StopCard: FC<StopCardProps> = ({ route, arrivalsAlongRoute, preOpened = false }) => {
+const StopCard: FC<StopCardProps> = ({ route, arrivalsAlongRoute, preOpened = false, stopInfo={} as StopInfo}) => {
   
   route = route || {} as RouteInfo; // TODO: handle invalid route'
   arrivalsAlongRoute = arrivalsAlongRoute || [] as Arrival[]; // TODO: handle invalid arrivals
-
+  
+  const stopLatLong: [number, number] = [stopInfo.lat ?? 40.7128, stopInfo.lon ?? -74.006]; // TODO: handle invalid stopInfo
+  // console.warn("stopLatLong", stopLatLong);
+  
   const firstArrival = arrivalsAlongRoute[0] || {} as Arrival;
 
   // Initialize isExpanded based on preOpened prop
@@ -96,7 +100,7 @@ const StopCard: FC<StopCardProps> = ({ route, arrivalsAlongRoute, preOpened = fa
       {isExpanded && (
         <Box mt={2} px={4} py={3} borderRadius="10px">
           {/* <Text color="gray.600">Placeholder for embedded map or route details</Text> */}
-          <MapWidget></MapWidget> 
+          <MapWidget stationPosition={stopLatLong} arrivalsAlongRoute={arrivalsAlongRoute}></MapWidget> 
         </Box>
       )}
     </Box>

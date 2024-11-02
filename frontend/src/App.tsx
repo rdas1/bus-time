@@ -5,6 +5,9 @@ import BusStopDashboard from './components/BusStopDashboard/BusStopDashboard';
 import NavBar from './components/NavBar/NavBar';
 import { BrowserRouter, Routes, Route, useParams } from 'react-router-dom';
 import 'leaflet/dist/leaflet.css';
+import 'leaflet.awesome-markers';
+import 'leaflet/dist/leaflet.css'; // Make sure Leaflet styles are imported
+import 'leaflet.awesome-markers/dist/leaflet.awesome-markers.css'; // Import Awesome Markers CSS
 
 
 function App() {

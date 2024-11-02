@@ -42,7 +42,8 @@ export interface Arrival {
   arrivalTime: string;
   stopsAway: number;
   distanceAwayMeters: number;
-  vehicleLocation: any;
+  vehicleLat: number;
+  vehicleLon: number;
   numberOfStopsAway: number;
 }
 
@@ -81,6 +82,8 @@ const parseStopInfo = (stopInfoApiResponse): StopInfo => {
     id: stopInfoApiResponse.id,
     name: stopInfoApiResponse.name,
     routes: parseRoutes(stopInfoApiResponse.routes),
+    lat: stopInfoApiResponse.lat,
+    lon: stopInfoApiResponse.lon,
   };
 }
 
@@ -131,7 +134,8 @@ const parseStopMonitoringResponse = (apiData): Record<string, Arrival[]> => {
       arrivalTime: journey.MonitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime,
       stopsAway: journey.MonitoredVehicleJourney.MonitoredCall.NumberOfStopsAway,
       distanceAwayMeters: journey.MonitoredVehicleJourney.MonitoredCall.DistanceFromStop,
-      vehicleLocation: journey.MonitoredVehicleJourney.VehicleLocation,
+      vehicleLat: journey.MonitoredVehicleJourney.VehicleLocation.Latitude,
+      vehicleLon: journey.MonitoredVehicleJourney.VehicleLocation.Longitude,
       numberOfStopsAway: journey.MonitoredVehicleJourney.MonitoredCall.NumberOfStopsAway,
       // TODO: Get SituationRef and check for alerts
       // TODO: Grab other fields as needed
@@ -205,10 +209,11 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
     return () => clearInterval(intervalId); // Cleanup interval on unmount
   }, [stopCodeToUse]);
 
+  console.warn("stopInfo: ", stopInfo);
   return (
     <Box className={styles.container}>
       <StopLabel name={stopInfo.name}></StopLabel>
-      <StopCardsList routes={stopInfo.routes} arrivalsData={stopMonitoringData} preopenedRoute={preopenedRoute}></StopCardsList>
+      <StopCardsList routes={stopInfo.routes} arrivalsData={stopMonitoringData} preopenedRoute={preopenedRoute} stopInfo={stopInfo}></StopCardsList>
       <LaterArrivalsSection routes={stopInfo.routes} arrivalsData={stopMonitoringData}></LaterArrivalsSection>
       <AlertsSection routes={stopInfo.routes} arrivalsData={stopMonitoringData}></AlertsSection>
     </Box>

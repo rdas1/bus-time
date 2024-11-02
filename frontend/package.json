@@ -61,8 +61,7 @@
     ]
   },
   "devDependencies": {
+    "@babel/plugin-transform-private-property-in-object": "^7.25.9",
     "@types/leaflet": "^1.9.14"
-  },
-  "homepage": "https://rdas1.github.io/bus-time"
-  
+  }
 }

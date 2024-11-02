@@ -25,7 +25,8 @@ jobs:
       - name: Build
         env:
           CI: false  # Disable treating warnings as errors
-          BACKEND_API_URL: ${{ secrets.BACKEND_API_URL }}
+          REACT_APP_API_BASE_URL: ${{ secrets.REACT_APP_API_BASE_URL }}
+          REACT_APP_STADIA_MAPS_API_KEY: ${{ secrets.REACT_APP_STADIA_MAPS_API_KEY }}
         working-directory: frontend  # Navigate to the frontend directory
         run: npm run build
 

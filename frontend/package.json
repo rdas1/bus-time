@@ -62,5 +62,7 @@
   },
   "devDependencies": {
     "@types/leaflet": "^1.9.14"
-  }
+  },
+  "homepage": "https://rdas1.github.io/bus-time"
+  
 }

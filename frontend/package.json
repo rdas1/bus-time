@@ -20,6 +20,7 @@
     "axios": "^1.7.7",
     "dotenv": "^16.4.5",
     "emotion-theming": "^10.3.0",
+    "gh-pages": "^6.2.0",
     "leaflet": "^1.9.4",
     "leaflet-iconmaterial": "^1.1.0",
     "leaflet.awesome-markers": "^2.0.5",
@@ -36,10 +37,10 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "start": "HOST=0.0.0.0 react-scripts start",
+    "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build"
   },
   "eslintConfig": {
     "extends": [

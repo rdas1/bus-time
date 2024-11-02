@@ -8,6 +8,8 @@ import LaterArrivalsSection from '../LaterArrivalsSection/LaterArrivalsSection';
 import AlertsSection from '../AlertsSection/AlertsSection';
 import axios from 'axios';
 
+const API_BASE_URL = process.env.API_BASE_URL || "127:0.0.1:5000";
+
 interface BusStopDashboardProps {
   stopcode?: string; // Prop for the stopcode
   preopenedRoute?: string; // Optional prop for the preopened route
@@ -55,9 +57,8 @@ export const getStopName = (stopcode: string): string => {
 }
 
 export const getStopInfo = async (stopcode: string): Promise<any> => {
-  const apiBaseUrl = "http://127.0.0.1:5000"; // For local testing
   try {
-    const response = await axios.get(`${apiBaseUrl}/api/stop/${stopcode}/info`);
+    const response = await axios.get(`${API_BASE_URL}/api/stop/${stopcode}/info`);
     return response.data.data; // Axios automatically parses JSON
   } catch (error) {
     console.error("Error fetching stop info:", error);
@@ -66,9 +67,8 @@ export const getStopInfo = async (stopcode: string): Promise<any> => {
 };
 
 export const getStopMonitoring = async (stopcode: string): Promise<any> => {
-  const apiBaseUrl = "http://127.0.0.1:5000"; // For local testing
   try {
-    const response = await axios.get(`${apiBaseUrl}/api/stop/${stopcode}/arrivals`);
+    const response = await axios.get(`${API_BASE_URL}/api/stop/${stopcode}/arrivals`);
     console.log("response.data: ", response.data);
     return response.data.Siri; // Axios automatically parses JSON
   } catch (error) {

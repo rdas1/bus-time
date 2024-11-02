@@ -3,7 +3,7 @@ import { Box } from '@chakra-ui/react';
 import './App.css';
 import BusStopDashboard from './components/BusStopDashboard/BusStopDashboard';
 import NavBar from './components/NavBar/NavBar';
-import { BrowserRouter, Routes, Route, useParams } from 'react-router-dom';
+import { HashRouter, Routes, Route, useParams } from 'react-router-dom';
 import 'leaflet/dist/leaflet.css';
 import 'leaflet.awesome-markers';
 import 'leaflet/dist/leaflet.css'; // Make sure Leaflet styles are imported
@@ -19,12 +19,8 @@ function App() {
     // Add more mock properties as needed
   };
 
-   // Determine the basename dynamically
-   const basename = window.location.pathname.includes('/bus-time') ? '/bus-time' : '';
-   console.log("basename: ", basename);
-
   return (
-    <BrowserRouter basename={basename}>
+    <HashRouter>
       <Box className='top-container'>
         <NavBar />
         <Box className="main-content" px={4}>
@@ -40,7 +36,7 @@ function App() {
           </Routes>
         </Box>
       </Box>
-    </BrowserRouter>
+    </HashRouter>
   );
 };
 

@@ -2,6 +2,7 @@
   "name": "frontend",
   "version": "0.1.0",
   "private": true,
+  "homepage": "https://rdas1.github.io/bus-time",
   "dependencies": {
     "@chakra-ui/react": "^3.0.2",
     "@emotion/react": "^11.13.3",

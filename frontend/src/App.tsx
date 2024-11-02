@@ -19,8 +19,12 @@ function App() {
     // Add more mock properties as needed
   };
 
+   // Determine the basename dynamically
+   const basename = window.location.pathname.includes('/bus-time') ? '/bus-time' : '';
+   console.log("basename: ", basename);
+
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={basename}>
       <Box className='top-container'>
         <NavBar />
         <Box className="main-content" px={4}>

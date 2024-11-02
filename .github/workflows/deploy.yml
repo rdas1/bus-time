@@ -11,25 +11,23 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3  # Updated to v3
 
       - name: Set up Node.js
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v3  # Updated to v3
         with:
-          node-version: '14'  # or your preferred Node version
+          node-version: '16'  # Use Node.js 16 or your preferred Node version
 
       - name: Install dependencies
         run: npm install
-        working-directory: frontend  # Set the working directory to frontend
+        working-directory: frontend  # Navigate to the frontend directory
 
       - name: Build
         env:
           BACKEND_API_URL: ${{ secrets.BACKEND_API_URL }}
         run: npm run build
-        working-directory: frontend  # Set the working directory to frontend
+        working-directory: frontend  # Navigate to the frontend directory
 
       - name: Deploy
-        uses: peaceiris/actions-gh-pages@v3  # Using the peaceiris action for deployment
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./frontend/build  # Set the publish directory to the build folder
+        run: npm run deploy
+        working-directory: frontend  # Navigate to the frontend directory

@@ -16,22 +16,20 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v2
         with:
-          node-version: '18.13.0'  # or your preferred Node version
+          node-version: '14'  # or your preferred Node version
 
       - name: Install dependencies
-        run: |
-          cd frontend  # Navigate to the frontend directory
-          npm install
+        run: npm install
+        working-directory: frontend  # Set the working directory to frontend
 
       - name: Build
         env:
           BACKEND_API_URL: ${{ secrets.BACKEND_API_URL }}
-        run: |
-          cd frontend  # Navigate to the frontend directory
-          npm run build
+        run: npm run build
+        working-directory: frontend  # Set the working directory to frontend
 
       - name: Deploy
-        uses: JamesIArmes/github-pages-deploy-action@4.0.0
+        uses: peaceiris/actions-gh-pages@v3  # Using the peaceiris action for deployment
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./frontend/build  # Path to the build directory
+          publish_dir: ./frontend/build  # Set the publish directory to the build folder

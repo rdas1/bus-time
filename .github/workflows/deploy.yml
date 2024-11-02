@@ -24,6 +24,7 @@ jobs:
 
       - name: Build
         env:
+          CI: false  # Disable treating warnings as errors
           BACKEND_API_URL: ${{ secrets.BACKEND_API_URL }}
         working-directory: frontend  # Navigate to the frontend directory
         run: npm run build

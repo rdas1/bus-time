@@ -78,10 +78,19 @@ export const getStopMonitoring = async (stopcode: string): Promise<any> => {
   }
 };
 
+const processName = (name: string): string => {
+  name = name.replace("/", " / "); // Replace " - " with " & "
+  // name = name.toLowerCase()
+  //   .split(' ')
+  //   .map((s) => s.charAt(0).toUpperCase() + s.substring(1))
+  //   .join(' ');
+  return name;
+}
+
 const parseStopInfo = (stopInfoApiResponse): StopInfo => {
   return {
     id: stopInfoApiResponse.id,
-    name: stopInfoApiResponse.name,
+    name: processName(stopInfoApiResponse.name),
     routes: parseRoutes(stopInfoApiResponse.routes),
     lat: stopInfoApiResponse.lat,
     lon: stopInfoApiResponse.lon,

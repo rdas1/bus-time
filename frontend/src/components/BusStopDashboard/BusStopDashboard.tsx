@@ -25,6 +25,14 @@ export interface StopInfo {
   lon?: number;
 }
 
+export interface AlertInfo {
+  situationNumber: string;
+  summary: string;
+  description: string;
+  affectedRoutes: string[];
+
+}
+
 export interface RouteInfo {
   id: string;
   longName: string; // e.g. Inwood - Harlem
@@ -47,6 +55,7 @@ export interface Arrival {
   vehicleLat: number;
   vehicleLon: number;
   numberOfStopsAway: number;
+  serviceAlerts?: AlertInfo[];
 }
 
 
@@ -129,11 +138,28 @@ export const getMinutesAway = (arrivalTimeString: string): number => {
   return differenceInMinutes;
 };
 
+const parseSituations = (situationExchangeDelivery: any): AlertInfo[] => {
+  if (situationExchangeDelivery === undefined) {
+    return [];
+  }
+  const alerts = situationExchangeDelivery.Situations.PtSituationElement;
+  return alerts.map((alert: any) => {
+    return {
+      situationNumber: alert.SituationNumber,
+      summary: alert.Summary,
+      description: alert.Description,
+      affectedRoutes: alert.Affects.VehicleJourneys.AffectedVehicleJourney.map((journey: any) => journey.LineRef.split("_")[1]),
+    };
+  });
+}
+
 const parseStopMonitoringResponse = (apiData): Record<string, Arrival[]> => {
   if (apiData.ServiceDelivery === undefined) {
     console.warn("Invalid API data: Missing ServiceDelivery field.");
     return {};
   }
+  const situationExchangeDelivery = apiData.ServiceDelivery.SituationExchangeDelivery;
+  const alerts: AlertInfo[] = situationExchangeDelivery ? parseSituations(situationExchangeDelivery[0]) : []; 
   const monitoredVehicleJourneys: any[] = apiData.ServiceDelivery.StopMonitoringDelivery[0].MonitoredStopVisit;
   // console.log(monitoredVehicleJourneys);
   const semiParsed: Arrival[] = monitoredVehicleJourneys.map((journey: any) => {
@@ -147,6 +173,7 @@ const parseStopMonitoringResponse = (apiData): Record<string, Arrival[]> => {
       vehicleLat: journey.MonitoredVehicleJourney.VehicleLocation.Latitude,
       vehicleLon: journey.MonitoredVehicleJourney.VehicleLocation.Longitude,
       numberOfStopsAway: journey.MonitoredVehicleJourney.MonitoredCall.NumberOfStopsAway,
+      serviceAlerts: alerts.filter((alert) => alert.affectedRoutes.includes(journey.MonitoredVehicleJourney.PublishedLineName[0]))
       // TODO: Get SituationRef and check for alerts
       // TODO: Grab other fields as needed
     };

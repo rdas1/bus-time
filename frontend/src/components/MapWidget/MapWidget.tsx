@@ -1,4 +1,4 @@
-import React, { FC } from 'react';
+import React, { FC, useEffect } from 'react';
 import styles from './MapWidget.module.scss';
 import { Box, Text } from '@chakra-ui/react';
 import { MapContainer, TileLayer, useMap, Marker, Popup } from 'react-leaflet'
@@ -37,7 +37,6 @@ const createBusIcon = () => {
 interface MapWidgetProps {
   stationPosition?: [number, number];
   arrivalsAlongRoute?: Arrival[];
-  zoom?: number;
 }
 
 const tileLayerUrl = `https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=${process.env.REACT_APP_STADIA_MAPS_API_KEY}`;
@@ -50,25 +49,40 @@ const getBusPosition = (arrivalsAlongRoute: Arrival[]) => {
   // return arrivalsAlongRoute[0].map((arrival) => [arrival.vehicleLat, arrival.vehicleLon]);
 }
 
-const MapWidget: FC<MapWidgetProps> = ({ stationPosition = [40.7128, -74.006], arrivalsAlongRoute = [] as Arrival[], zoom = 13 }) => {
+const MapBoundsSetter: FC<{ positions: LatLngTuple[] }> = ({ positions }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (positions.length > 0) {
+      const bounds = L.latLngBounds(positions);
+      map.fitBounds(bounds, { padding: [50, 50] }); // Add padding on each side
+    }
+  }, [positions, map]);
+
+  return null; // This component doesn't render anything visible
+};
+
+const MapWidget: FC<MapWidgetProps> = ({ stationPosition = [40.7128, -74.006], arrivalsAlongRoute = [] }) => {
   const busPosition = getBusPosition(arrivalsAlongRoute);
-  console.log("busPosition", busPosition);
+  
+  // Collect positions for both the station and bus to set bounds
+  const positions: LatLngTuple[] = [stationPosition, busPosition];
+
   return (
     <Box h={72}>
-      <MapContainer center={stationPosition} zoom={zoom} style={{ height: '100%', width: '100%' }}>
-          <TileLayer
-            url={tileLayerUrl}
-            attribution={tileLayerAttribution}
-          />
-          <Marker position={stationPosition} icon={createStationIcon()}>
-            <Popup>The station</Popup>
-          </Marker>
-          <Marker position={busPosition} icon={createBusIcon()}>
-            <Popup>The bus</Popup>
-          </Marker>
-        </MapContainer>
+      <MapContainer center={stationPosition} style={{ height: '100%', width: '100%' }}>
+        <TileLayer url={tileLayerUrl} attribution={tileLayerAttribution} />
+        <Marker position={stationPosition} icon={createStationIcon()}>
+          <Popup>The station</Popup>
+        </Marker>
+        <Marker position={busPosition} icon={createBusIcon()}>
+          <Popup>The bus</Popup>
+        </Marker>
+        {/* Use the MapBoundsSetter component to fit bounds */}
+        <MapBoundsSetter positions={positions} />
+      </MapContainer>
     </Box>
-   );
+  );
 };
 
 export default MapWidget;

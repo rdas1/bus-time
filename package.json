@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "@types/leaflet.awesome-markers": "^2.0.28"
+  }
+}

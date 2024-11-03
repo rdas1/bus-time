@@ -9,9 +9,6 @@ import AlertsSection from '../AlertsSection/AlertsSection';
 import axios from 'axios';
 
 const REACT_APP_API_BASE_URL = process.env.REACT_APP_API_BASE_URL ?? "http://127.0.0.1:5000";
-console.log("REACT_APP_API_BASE_URL: ", REACT_APP_API_BASE_URL);
-console.log("REACT_APP_STADIA_MAPS_API_KEY: ", process.env.REACT_APP_STADIA_MAPS_API_KEY ?? "No API key found");
-
 
 interface BusStopDashboardProps {
   stopcode?: string; // Prop for the stopcode

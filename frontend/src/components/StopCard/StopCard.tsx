@@ -19,6 +19,9 @@ const convertMetersToFeet = (meters: number) => {
 
 const getMinutesAwayText = (arrivalData) => {  
   const minutesAway = getMinutesAway(arrivalData.arrivalTime);
+  if (Number.isNaN(minutesAway)) {
+    return "Unknown";
+  }
   // Actually, change to <30 seconds
   if (arrivalData.distanceAwayMeters <= 30.48)  { // TODO: make constant (100ft in meters)
     return "Now"
@@ -30,6 +33,9 @@ const getMinutesAwayText = (arrivalData) => {
 }
 
 const getStopsAwayText = (arrivalData) => {
+  if (Number.isNaN(arrivalData.stopsAway)) {
+    return "Check service alerts";
+  }
   // Actually, change to <30 seconds
   if (arrivalData.distanceAwayMeters <= 30.48)  { // TODO: make constant (100ft in meters)
     return "At Stop"

@@ -167,7 +167,7 @@ const parseStopMonitoringResponse = (apiData): Record<string, Arrival[]> => {
       route: journey.MonitoredVehicleJourney.PublishedLineName[0],
       directionRef: journey.MonitoredVehicleJourney.DirectionRef,
       destination: journey.MonitoredVehicleJourney.DestinationName[0],
-      arrivalTime: journey.MonitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime,
+      arrivalTime: journey.MonitoredVehicleJourney.MonitoredCall.ExpectedArrivalTime,// ?? journey.MonitoredVehicleJourney.MonitoredCall.AimedArrivalTime,
       stopsAway: journey.MonitoredVehicleJourney.MonitoredCall.NumberOfStopsAway,
       distanceAwayMeters: journey.MonitoredVehicleJourney.MonitoredCall.DistanceFromStop,
       vehicleLat: journey.MonitoredVehicleJourney.VehicleLocation.Latitude,
@@ -252,7 +252,7 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
       <StopLabel name={stopInfo.name}></StopLabel>
       <StopCardsList routes={stopInfo.routes} arrivalsData={stopMonitoringData} preopenedRoute={preopenedRoute} stopInfo={stopInfo}></StopCardsList>
       <LaterArrivalsSection routes={stopInfo.routes} arrivalsData={stopMonitoringData} stopInfo={stopInfo}></LaterArrivalsSection>
-      <AlertsSection routes={stopInfo.routes} arrivalsData={stopMonitoringData} stopInfo={stopInfo}></AlertsSection>
+      <AlertsSection arrivalsData={stopMonitoringData}></AlertsSection>
     </Box>
   );
 };

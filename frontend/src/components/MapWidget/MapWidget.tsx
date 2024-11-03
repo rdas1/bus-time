@@ -55,7 +55,7 @@ const MapBoundsSetter: FC<{ positions: LatLngTuple[] }> = ({ positions }) => {
   useEffect(() => {
     if (positions.length > 0) {
       const bounds = L.latLngBounds(positions);
-      map.fitBounds(bounds, { padding: [5, 5] }); // Add padding on each side
+      map.fitBounds(bounds, { padding: [18, 18] }); // Add padding on each side
     }
   }, [positions, map]);
 
@@ -70,7 +70,7 @@ const MapWidget: FC<MapWidgetProps> = ({ stationPosition = [40.7128, -74.006], a
 
   return (
     <Box h={72}>
-      <MapContainer center={stationPosition} style={{ height: '100%', width: '100%' }}>
+      <MapContainer center={stationPosition} zoomControl={false} style={{ height: '100%', width: '100%' }}>
         <TileLayer url={tileLayerUrl} attribution={tileLayerAttribution} />
         <Marker position={stationPosition} icon={createStationIcon()}>
           <Popup>The station</Popup>

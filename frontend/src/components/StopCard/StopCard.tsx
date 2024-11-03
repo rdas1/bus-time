@@ -101,9 +101,9 @@ const StopCard: FC<StopCardProps> = ({ route, arrivalsAlongRoute, preOpened = fa
 
       {/* Expanded Content */}
       {isExpanded && (
-        <Box mt={-4} px={4} py={3} borderRadius={"10px"} bgColor={"gray.800"}>
-          <Text color="gray.600"></Text>
-          <Box mt={6} mb={4}>
+        <Box mt={-4} px={4} py={4} borderRadius={"10px"} bgColor={"black"}>
+          {/* <Text color="white" fontWeight={"medium"}>Current position:</Text> */}
+          <Box mt={4} mb={4}>
             <MapWidget stationPosition={stopLatLong} arrivalsAlongRoute={arrivalsAlongRoute}></MapWidget> 
           </Box>
           {serviceAlerts.map((alert, index) => (

@@ -55,7 +55,7 @@ const MapBoundsSetter: FC<{ positions: LatLngTuple[] }> = ({ positions }) => {
   useEffect(() => {
     if (positions.length > 0) {
       const bounds = L.latLngBounds(positions);
-      map.fitBounds(bounds, { padding: [18, 18] }); // Add padding on each side
+      map.fitBounds(bounds, { padding: [24, 24] }); // Add padding on each side
     }
   }, [positions, map]);
 

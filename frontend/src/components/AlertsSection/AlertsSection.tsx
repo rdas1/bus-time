@@ -47,7 +47,7 @@ const AlertsSection: FC<AlertsSectionProps> = ({arrivalsData}) => {
       </Box>
       <Box className={styles.routes} px={2}>
         {serviceAlerts.map((alert, index) => (
-          <ServiceAlertCard key={index} alert={alert} bgColor='black'></ServiceAlertCard>
+          <ServiceAlertCard key={index} alert={alert}></ServiceAlertCard>
         ))}
       </Box>
       {/* <Box className={styles.routes} px={2}>

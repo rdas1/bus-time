@@ -19,6 +19,17 @@ const createCustomIcon = (icon: React.ReactNode, color: string) => {
   });
 };
 
+// Create custom marker icons using Leaflet Awesome Markers
+const createStationIcon = (color: string = "black") => {
+  const iconElement = ReactDOMServer.renderToString(
+    <div style={{ color: color, fontSize: '24px' }}>{<MyLocationIcon/>}</div>
+  );
+  return L.AwesomeMarkers.icon({
+    markerColor: 'blue', // Choose your color
+    prefix: 'fa', // Use Font Awesome icons
+  });
+};
+
 interface MapWidgetProps {
   stationPosition?: [number, number];
   arrivalsAlongRoute?: Arrival[];
@@ -39,7 +50,7 @@ const MapBoundsSetter: FC<{ positions: LatLngTuple[] }> = ({ positions }) => {
   useEffect(() => {
     if (positions.length > 0) {
       const bounds = L.latLngBounds(positions);
-      map.fitBounds(bounds, { padding: [24, 24] });
+      map.fitBounds(bounds, { padding: [30, 30] });
     }
   }, [positions, map]);
 
@@ -56,7 +67,7 @@ const MapWidget: FC<MapWidgetProps> = ({ stationPosition = [40.7128, -74.006], a
     <Box h={72}>
       <MapContainer center={stationPosition} zoomControl={false} style={{ height: '100%', width: '100%' }}>
         <TileLayer url={tileLayerUrl} attribution={tileLayerAttribution} />
-        <Marker position={stationPosition} icon={createCustomIcon(<MyLocationIcon />, 'blue')}>
+        <Marker position={stationPosition} icon={createStationIcon()}>
           <Popup>The station</Popup>
         </Marker>
         <Marker position={busPosition} icon={createCustomIcon(<BusIcon />, 'red')}>

@@ -35,6 +35,8 @@ const processDestinationName = (destination: string): string => {
     .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
     .join(' ');
 
+  destination = destination.replace('Gw ', 'GW ');
+
   return destination;
 }
 
@@ -118,7 +120,7 @@ const StopCard: FC<StopCardProps> = ({ route, arrivalsAlongRoute, preOpened = fa
           {/* Left-aligned route name */}
           <Flex direction="column" align="flex-start" minW={40}>
             <Text fontSize="lg">{route.shortName}</Text> {/* TODO: Display blue pill icon for bus routes */}
-            <Text lineClamp={isExpanded ? 0 : 1} text-wrap="wrap" overflow={isExpanded ? "visible" : "visible"} fontSize="sm" textAlign="left" fontWeight="300">to {destinationText}</Text>
+            <Text lineClamp={2} text-wrap="wrap" overflow={isExpanded ? "visible" : "visible"} fontSize="sm" textAlign="left" fontWeight="300">to {destinationText}</Text>
           </Flex>
 
           {/* Right-aligned time info */}

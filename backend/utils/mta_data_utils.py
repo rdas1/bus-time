@@ -7,10 +7,10 @@ MTA_API_KEY = os.getenv("MTA_API_KEY")
 
 def get_stops_along_route(route_id, include_polylines=False):
     url = STOPS_ALONG_ROUTE_URL.format(route_id=route_id)
-
+    # return {"message": url}
     params = {
         'key': MTA_API_KEY,
-        'includePolylines': False,
+        'includePolylines': include_polylines,
     }
 
     response = requests.get(url, params=params)

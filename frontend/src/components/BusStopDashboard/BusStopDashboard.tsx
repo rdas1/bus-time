@@ -8,7 +8,7 @@ import LaterArrivalsSection from '../LaterArrivalsSection/LaterArrivalsSection';
 import AlertsSection from '../AlertsSection/AlertsSection';
 import axios from 'axios';
 
-const REACT_APP_API_BASE_URL = process.env.REACT_APP_API_BASE_URL ?? "http://127.0.0.1:5000";
+export const REACT_APP_API_BASE_URL = process.env.REACT_APP_API_BASE_URL ?? "http://127.0.0.1:5000";
 
 interface BusStopDashboardProps {
   stopcode?: string; // Prop for the stopcode
@@ -54,6 +54,7 @@ export interface Arrival {
   distanceAwayMeters: number;
   vehicleLat: number;
   vehicleLon: number;
+  vehicleBearing?: number;
   numberOfStopsAway: number;
   serviceAlerts?: AlertInfo[];
 }
@@ -86,6 +87,16 @@ export const getStopMonitoring = async (stopcode: string): Promise<any> => {
     throw error; // Rethrow for further handling if needed
   }
 };
+
+export const getStopsAlongRoute = async (routeId: string): Promise<any> => {
+  try {
+    const response = await axios.get(`http://127.0.0.1:5000/api/route/${routeId}/stops`);
+    return response.data.data; // Axios automatically parses JSON
+  } catch (error) {
+    console.error("Error fetching stops along route:", error);
+    throw error; // Rethrow for further handling if needed
+  }
+}
 
 const processName = (name: string): string => {
   name = name.replace("/", " / "); // Replace " - " with " & "
@@ -172,6 +183,7 @@ const parseStopMonitoringResponse = (apiData): Record<string, Arrival[]> => {
       distanceAwayMeters: journey.MonitoredVehicleJourney.MonitoredCall.DistanceFromStop,
       vehicleLat: journey.MonitoredVehicleJourney.VehicleLocation.Latitude,
       vehicleLon: journey.MonitoredVehicleJourney.VehicleLocation.Longitude,
+      vehicleBearing: journey.MonitoredVehicleJourney.Bearing,
       numberOfStopsAway: journey.MonitoredVehicleJourney.MonitoredCall.NumberOfStopsAway,
       serviceAlerts: alerts.filter((alert) => alert.affectedRoutes.includes(journey.MonitoredVehicleJourney.PublishedLineName[0]))
       // TODO: Get SituationRef and check for alerts

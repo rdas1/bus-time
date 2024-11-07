@@ -58,6 +58,12 @@ const StopCard: FC<StopCardProps> = ({ route, arrivalsAlongRoute, preOpened = fa
   // console.warn("stopLatLong", stopLatLong);
   
   const firstArrival = arrivalsAlongRoute[0] || {} as Arrival;
+  let destinationText;
+  try {
+    destinationText = route.destination.split(" - ")[parseInt(firstArrival.directionRef)];
+  } catch (error) {
+    destinationText = route.destination;
+  }
 
   const serviceAlerts: AlertInfo[] = firstArrival.serviceAlerts || [];
 
@@ -85,7 +91,7 @@ const StopCard: FC<StopCardProps> = ({ route, arrivalsAlongRoute, preOpened = fa
           {/* Left-aligned route name */}
           <Flex direction="column" align="flex-start" minW={40}>
             <Text fontSize="lg">{route.shortName}</Text> {/* TODO: Display blue pill icon for bus routes */}
-            <Text lineClamp={isExpanded ? 1 : 1} text-wrap="wrap" overflow={isExpanded ? "visible" : "hidden"} fontSize="sm" textAlign="left" fontWeight="300">to {route.destination}</Text>
+            <Text lineClamp={isExpanded ? 1 : 1} text-wrap="wrap" overflow={isExpanded ? "visible" : "hidden"} fontSize="sm" textAlign="left" fontWeight="300">to {destinationText}</Text>
           </Flex>
 
           {/* Right-aligned time info */}

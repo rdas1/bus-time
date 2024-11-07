@@ -119,7 +119,7 @@ const parseRoutes = (routesData: any): RouteInfo[] => {
       longName: route.longName,
       shortName: route.shortName,
       description: route.description,
-      destination: route.longName.split(" - ")[1], // TODO: check if this is the correct way to get the destination
+      destination: route.longName//.split(" - ")[1], // TODO: check if this is the correct way to get the destination
     };
   })
 }

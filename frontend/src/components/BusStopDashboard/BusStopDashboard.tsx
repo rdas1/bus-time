@@ -90,7 +90,7 @@ export const getStopMonitoring = async (stopcode: string): Promise<any> => {
 
 export const getStopsAlongRoute = async (routeId: string): Promise<any> => {
   try {
-    const response = await axios.get(`http://127.0.0.1:5000/api/route/${routeId}/stops`);
+    const response = await axios.get(`${REACT_APP_API_BASE_URL}/api/route/${routeId}/stops`);
     return response.data.data; // Axios automatically parses JSON
   } catch (error) {
     console.error("Error fetching stops along route:", error);

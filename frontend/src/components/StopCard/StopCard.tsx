@@ -13,6 +13,31 @@ interface StopCardProps {
   stopInfo?: StopInfo;
 }
 
+const processDestinationName = (destination: string): string => {
+  destination = destination.replace('LIMITED ', ''); // Replace hyphens with "to"
+  destination = destination.replace('LTD ', ''); // Replace hyphens with "to"
+
+  destination = destination.split(" via ")[0];
+
+  destination = destination.replace('AV-', 'Av/'); // Add spaces around hyphens
+  destination = destination.replace('ST-', 'St/'); // Add spaces around hyphens
+  destination = destination.replace('ST & ', 'St/'); // Add spaces around hyphens
+  destination = destination.replace('ST & ', 'St/'); // Add spaces around hyphens
+  // Replace "NUMBER ST NUMBER AV" with "NUMBER ST/NUMBER AV"
+  destination = destination.replace(/(\d+ St) (\d+ Av)/gi, '$1/$2');
+  // Replace "NUMBER AV NUMBER ST" with "NUMBER AV/NUMBER ST"
+  destination = destination.replace(/(\d+ Av) (\d+ St)/gi, '$1/$2');
+  destination = destination.replace('/', ' / '); // Add spaces around slashes
+  
+  // Wrap street corners in parentheses only if there are words before them
+  destination = destination.replace(/(\b\w+\b.*?)(\d+ \w+ \/ \d+ \w+)/g, '$1($2)');  // Capitalize the first letter of each word
+  destination = destination.split(' ')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(' ');
+
+  return destination;
+}
+
 const convertMetersToFeet = (meters: number) => {
   return Math.floor(meters * 3.28084);
 }
@@ -60,7 +85,8 @@ const StopCard: FC<StopCardProps> = ({ route, arrivalsAlongRoute, preOpened = fa
   const firstArrival = arrivalsAlongRoute[0] || {} as Arrival;
   let destinationText;
   try {
-    destinationText = route.destination.split(" - ")[parseInt(firstArrival.directionRef)];
+    destinationText = processDestinationName(firstArrival.destination) 
+    // destinationText = route.destination.split(" - ")[parseInt(firstArrival.directionRef)];
   } catch (error) {
     destinationText = route.destination;
   }
@@ -85,23 +111,24 @@ const StopCard: FC<StopCardProps> = ({ route, arrivalsAlongRoute, preOpened = fa
         borderRadius="10px"
         width="100%"
         onClick={toggleExpand}
+        px={2}
       >
         <Flex justify="space-around" align="center" pl={4} >
           
           {/* Left-aligned route name */}
           <Flex direction="column" align="flex-start" minW={40}>
             <Text fontSize="lg">{route.shortName}</Text> {/* TODO: Display blue pill icon for bus routes */}
-            <Text lineClamp={isExpanded ? 1 : 1} text-wrap="wrap" overflow={isExpanded ? "visible" : "hidden"} fontSize="sm" textAlign="left" fontWeight="300">to {destinationText}</Text>
+            <Text lineClamp={isExpanded ? 0 : 1} text-wrap="wrap" overflow={isExpanded ? "visible" : "visible"} fontSize="sm" textAlign="left" fontWeight="300">to {destinationText}</Text>
           </Flex>
 
           {/* Right-aligned time info */}
-          <Flex direction="column" align="space-evenly" w={28} mx={1} pr={1}>
+          <Flex direction="column" align="space-evenly" w={28} mx={1}>
             <Text fontSize="lg">{getMinutesAwayText(firstArrival)}</Text>
             <Text fontSize="sm" fontWeight="300" color="gray.100">{getStopsAwayText(firstArrival)}</Text>
           </Flex>
         </Flex>
 
-        <Box mr={2}>
+        <Box mr={4} pl={-2}>
             {/* Expand/Collapse Icon */}
             {isExpanded ? (
               <FiChevronUp size={20} />

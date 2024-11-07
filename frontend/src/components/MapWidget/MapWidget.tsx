@@ -166,7 +166,7 @@ const MapWidget: FC<MapWidgetProps> = ({ stationPosition = [40.7128, -74.006], a
         ))}
         <MapBoundsSetter positions={stationAndBusPositions} />
         {routePolyline.length > 0 && (
-          <Polyline positions={routePolyline} color="red" weight={1} opacity={0.7} />
+          <Polyline positions={routePolyline} color="blue" weight={2} opacity={0.7} />
         )}
         {/* <RoutePolyline routeId={route} /> */}
       </MapContainer>

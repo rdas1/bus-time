@@ -12,6 +12,7 @@ var polyUtil = require('polyline-encoded');
 // console.log(latlngs);
 
 const getPolylinesAlongRoute = async (routeId: string) => {
+  routeId = routeId.replace('-SBS', '+');
   const stopsAlongRoute = await getStopsAlongRoute(routeId);
   if (!stopsAlongRoute || !stopsAlongRoute.polylines) return null;
   const latlngs = polyUtil.decode(stopsAlongRoute.polylines[0].points)
@@ -165,7 +166,7 @@ const MapWidget: FC<MapWidgetProps> = ({ stationPosition = [40.7128, -74.006], a
           </Marker>
         ))}
         <MapBoundsSetter positions={stationAndBusPositions} />
-        {routePolyline.length > 0 && (
+        {routePolyline && (
           <Polyline positions={routePolyline} color="blue" weight={2} opacity={0.7} />
         )}
         {/* <RoutePolyline routeId={route} /> */}

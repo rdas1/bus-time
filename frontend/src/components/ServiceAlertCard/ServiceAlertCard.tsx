@@ -20,7 +20,7 @@ const ServiceAlertCard: FC<ServiceAlertCardProps> = ({alert, bgColor="#0039A6"})
       px={2}
       boxShadow={"sm"}
     >
-      <Text fontSize="lg" p={2}>{alert.summary}</Text>      
+      <Text fontSize="lg" p={2} color={"white"}>{alert.summary}</Text>      
     </Box>
   )
 }

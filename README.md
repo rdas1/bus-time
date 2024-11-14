@@ -1,4 +1,4 @@
-# Web app for viewing live bus arrival times at NYC bus stations
+# Mobile web app for viewing live bus arrival times at NYC bus stations
 
 Available at [https://rdas1.github.io/bus-time/](https://rdas1.github.io/bus-time/)
 

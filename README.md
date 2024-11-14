@@ -24,6 +24,6 @@ Only 1% of NYC's 15k bus stops have electronic signage indicating bus arrivals t
 </p>
 These signs provide 5 options for accessing bus arrival times. Rather than emphasize the system’s flexibility, this graphic design overwhelms potential users and makes what should be a simple task seem overly complicated. Moreover, the interfaces themselves are difficult and often unpleasant to use. The SMS interface, for example, requires memorizing and typing in an arbitrary 6-digit stopcode to an arbitrary 7-digit number; and the mobile web app, while functional, is visually dated and somewhat jargon-heavy.
 
-
+<br>
 
 I wanted to redesign both the mobile web interface and its access point in such a way that I could deploy a live prototype, and provide reliable arrival-time information to real users in my neighborhood (and beyond).

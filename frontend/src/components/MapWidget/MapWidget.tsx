@@ -12,6 +12,7 @@ var polyUtil = require('polyline-encoded');
 // console.log(latlngs);
 
 const getPolylinesAlongRoute = async (routeId: string) => {
+  if (!routeId) return [];
   routeId = routeId.replace('-SBS', '+');
   const stopsAlongRoute = await getStopsAlongRoute(routeId);
   if (!stopsAlongRoute || !stopsAlongRoute.polylines) return null;

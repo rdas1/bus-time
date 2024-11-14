@@ -47,6 +47,7 @@ const convertMetersToFeet = (meters: number) => {
 const getMinutesAwayText = (arrivalData) => {  
   const minutesAway = getMinutesAway(arrivalData.arrivalTime);
   if (Number.isNaN(minutesAway)) {
+    console.log("arrivalData", arrivalData);
     return "Unknown";
   }
   // Actually, change to <30 seconds
@@ -81,6 +82,13 @@ const StopCard: FC<StopCardProps> = ({ route, arrivalsAlongRoute, preOpened = fa
   route = route || {} as RouteInfo; // TODO: handle invalid route'
   arrivalsAlongRoute = arrivalsAlongRoute || [] as Arrival[]; // TODO: handle invalid arrivals
   
+  // Initialize isExpanded based on preOpened prop
+  const [isExpanded, setIsExpanded] = useState(preOpened);
+
+  if (arrivalsAlongRoute.length === 0) {
+    return null;
+  }
+
   const stopLatLong: [number, number] = [stopInfo.lat ?? 40.7128, stopInfo.lon ?? -74.006]; // TODO: handle invalid stopInfo
   // console.warn("stopLatLong", stopLatLong);
   
@@ -94,9 +102,6 @@ const StopCard: FC<StopCardProps> = ({ route, arrivalsAlongRoute, preOpened = fa
   }
 
   const serviceAlerts: AlertInfo[] = firstArrival.serviceAlerts || [];
-
-  // Initialize isExpanded based on preOpened prop
-  const [isExpanded, setIsExpanded] = useState(preOpened);
 
   const toggleExpand = () => setIsExpanded(!isExpanded);
 

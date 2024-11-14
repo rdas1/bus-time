@@ -16,7 +16,7 @@ So far, they've been totaling about 40 scans per day. I'm planning to put up mor
 # Why?
 
 Only 1% of NYC's 15k bus stops have electronic signage indicating bus arrivals times. At all other stops, riders are directed to a software solution called MTA Bus Time via text-heavy, cluttered signs:
-<p float="left align="center">
+<p float="left" align="center">
     <img src="images/mta_sign.JPG" alt="Current MTA Signage" height="400"/>
     <img src="images/mta_interface.PNG" alt="Current MTA web interface" height="400"/>
 </p>

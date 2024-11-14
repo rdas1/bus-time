@@ -37,7 +37,7 @@ const AlertsSection: FC<AlertsSectionProps> = ({arrivalsData}) => {
   const serviceAlerts: AlertInfo[] = getAlerts(arrivalsData || {} as Record<string, Arrival[]>);
 
   return (
-    <Box my={2}>
+    <Box my={2} pb={6}>
       <Box  
         color="white" // Text color
         fontSize="xl" // Set font size (you can also use values like '2xl', etc.)

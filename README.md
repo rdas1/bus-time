@@ -1,11 +1,11 @@
 # A web app for viewing bus arrival times at NYC bus stations
 Only 1% of NYC's 15k bus stops have electronic signage indicating bus arrivals times. At all other stops, riders are directed to a software solution called MTA Bus Time via text-heavy, cluttered signs:
 
-<img src="images/mta_sign.JPG" alt="Current MTA Signage" width="200"/>
+<img src="images/mta_sign.JPG" alt="Current MTA Signage" width="300"/>
 
 These signs provide 5 options for accessing bus arrival times. Rather than emphasize the system’s flexibility, this graphic design overwhelms potential users and makes what should be a simple task seem overly complicated. Moreover, the interfaces themselves are difficult and often unpleasant to use. The tiny QR code in the image above, for example, leads to the following functional but somewhat unappealing mobile web app:
 
-![Current MTA signage](images/mta_interface.PNG?raw=true)
+<img src="images/mta_interface.JPG" alt="Current MTA web interface" width="300"/>
 
 For my Human-Computer Interaction course project, I redesigned both the signage and the mobile web app for accessing bus arrival times from MTA bus stops.
 

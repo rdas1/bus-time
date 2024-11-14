@@ -9,7 +9,7 @@ I developed a web app, available at [this link](https://rdas1.github.io/bus-time
 <p float="left" align="center">
     <img src="images/example_sign.JPG" alt="My redesigned signage, posted at the Amsterdam Avenue / W 145th St bus stop" height="400"/>
     <img src="images/example_page.JPG" alt="My redesigned webpage, showing bus arrivals at Amsterdam Avenue / W 145th St bus stop" height="400"/>
-    <img src="images/example_map.JPG" alt="Expanding a card reveals a map widget indicating live bus locations." height="400"/>
+    <img src="images/example_map_widget.JPG" alt="Expanding a card reveals a map widget indicating live bus locations." height="400"/>
 </p>
 
 So far, they've been totaling about 40 scans per day. I'm planning to put up more signs at other stations across NYC so that more people can easily view bus arrival times.

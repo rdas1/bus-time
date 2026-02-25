@@ -5,20 +5,7 @@ import L, { LatLngTuple } from 'leaflet';
 import 'leaflet-polylinedecorator';
 import { DirectionsBusFilledRounded as BusIcon, MyLocation as MyLocationIcon } from '@mui/icons-material';
 import ReactDOMServer from 'react-dom/server'; // Import ReactDOMServer for rendering to string
-import { Arrival, getStopsAlongRoute } from '../BusStopDashboard/BusStopDashboard';
-var polyUtil = require('polyline-encoded');
-// var encoded = "_p~iF~cn~U_ulLn{vA_mqNvxq`@";
-// var latlngs = polyUtil.decode(encoded);
-// console.log(latlngs);
-
-const getPolylinesAlongRoute = async (routeId: string) => {
-  if (!routeId) return [];
-  routeId = routeId.replace('-SBS', '+');
-  const stopsAlongRoute = await getStopsAlongRoute(routeId);
-  if (!stopsAlongRoute || !stopsAlongRoute.polylines) return null;
-  const latlngs = polyUtil.decode(stopsAlongRoute.polylines[0].points)
-  return latlngs;
-}
+import { Arrival, getPolylinesAlongRoute } from '../BusStopDashboard/BusStopDashboard';
 
 // const getStopLocationsAlongRoute = async (routeId: string) => {
 
@@ -38,7 +25,7 @@ const createCustomIcon = (icon: React.ReactNode, color: string) => {
 };
 
 // Create custom marker icons using Leaflet Awesome Markers
-const createStationIcon = (color: string = "black") => {
+export const createStationIcon = (color: string = "black") => {
   const iconElement = ReactDOMServer.renderToString(
     <div style={{ color: color, fontSize: '24px' }}>{<MyLocationIcon/>}</div>
   );

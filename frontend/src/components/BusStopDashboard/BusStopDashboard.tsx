@@ -1,5 +1,5 @@
 import { Box, Text, useBreakpointValue } from '@chakra-ui/react';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import styles from './BusStopDashboard.module.scss';
 import { useParams } from 'react-router-dom';
 import StopLabel from '../StopLabel/StopLabel';
@@ -227,6 +227,8 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
   // const [stopName, setStopName] = useState<string | null>("Loading...");
   // const [routes, setRoutes] = useState<RouteInfo[]>([]);
   const [stopMonitoringData, setStopMonitoringData] = useState<Record<string, Arrival[]>>({} as Record<string, Arrival[]>);
+  const [secondsUntilRefresh, setSecondsUntilRefresh] = useState(30);
+  const lastFetchTimeRef = useRef<number>(Date.now());
 
   // Use the stopcode from props or fallback to a default value
   const stopCodeToUse = stopcode || "402506";
@@ -260,6 +262,7 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
       } catch (error) {
         console.error("Failed to fetch stop monitoring data:", error);
       }
+      lastFetchTimeRef.current = Date.now();
     };
 
     // Call immediately, then every 30 seconds
@@ -268,6 +271,14 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
 
     return () => clearInterval(intervalId); // Cleanup interval on unmount
   }, [stopCodeToUse]);
+
+  useEffect(() => {
+    const countdownId = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - lastFetchTimeRef.current) / 1000);
+      setSecondsUntilRefresh(Math.max(0, 30 - elapsed));
+    }, 1000);
+    return () => clearInterval(countdownId);
+  }, []);
 
   const isDesktop = useBreakpointValue({ base: false, md: true });
 
@@ -288,7 +299,7 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
         px={4}
         py={2}
       >
-        <StopLabel name={stopInfo.name} />
+        <StopLabel name={stopInfo.name} secondsUntilRefresh={secondsUntilRefresh} />
         <StopCardsList routes={stopInfo.routes} arrivalsData={stopMonitoringData} preopenedRoute={preopenedRoute} stopInfo={stopInfo} />
         <LaterArrivalsSection routes={stopInfo.routes} arrivalsData={stopMonitoringData} stopInfo={stopInfo} />
         <AlertsSection arrivalsData={stopMonitoringData} />

@@ -4,10 +4,11 @@ import { Box, Flex, Text } from '@chakra-ui/react';
 
 interface StopLabelProps {
   name?: string;
+  secondsUntilRefresh?: number;
 }
 
-const StopLabel: FC<StopLabelProps> = ({ name }) => (
-  <Box  
+const StopLabel: FC<StopLabelProps> = ({ name, secondsUntilRefresh }) => (
+  <Box
     bg="mtaColors.labelPurple" // You can use the exact color value or define it in your theme
     color="white" // Text color
     fontSize="xl" // Set font size (you can also use values like '2xl', etc.)
@@ -19,11 +20,14 @@ const StopLabel: FC<StopLabelProps> = ({ name }) => (
     // boxShadow="sm"
     textAlign="left" // Center text alignment // TODO: add support for RTL languages
   >
-    {/* <Flex align="center">
-      <Text fontWeight="medium">Stop:</Text>
-      <Text fontWeight={"medium"} ml={1}>{name}</Text>
-    </Flex> */}
-    <Text fontWeight={"medium"}>{name}</Text>
+    <Flex align="center" justify="space-between">
+      <Text fontWeight="medium">{name}</Text>
+      {secondsUntilRefresh !== undefined && (
+        <Text fontSize="sm" opacity={0.75} fontWeight="normal" flexShrink={0} ml={2}>
+          ↻ {secondsUntilRefresh}s
+        </Text>
+      )}
+    </Flex>
   </Box>
 );
 

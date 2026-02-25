@@ -11,20 +11,16 @@ interface StopCardsListProps {
   stopInfo?: StopInfo;
 }
 
-const StopCardsList: FC<StopCardsListProps> = ({routes, arrivalsData, preopenedRoute, stopInfo}) => {
-  routes = routes || [] as RouteInfo[];
-  preopenedRoute = (preopenedRoute || "").toLocaleLowerCase();
-  arrivalsData = arrivalsData || {};
-  stopInfo = stopInfo || {} as StopInfo;
-  console.log("stopInfo in StopCardsList", stopInfo);
+const StopCardsList: FC<StopCardsListProps> = ({routes = [], arrivalsData = {}, preopenedRoute = "", stopInfo = {} as StopInfo}) => {
+  const normalizedPreopenedRoute = preopenedRoute.toLocaleLowerCase();
   return (
     <Box className={styles.routes} px={2}>
-      {routes.map((routeInfo, index) => (
-        <StopCard 
-          key={index}
+      {routes.map((routeInfo) => (
+        <StopCard
+          key={routeInfo.id}
           route={routeInfo}
           arrivalsAlongRoute={arrivalsData[routeInfo.shortName] || ([] as Arrival[])}
-          preOpened={routeInfo.shortName.toLocaleLowerCase() === preopenedRoute}
+          preOpened={routeInfo.shortName.toLocaleLowerCase() === normalizedPreopenedRoute}
           stopInfo={stopInfo}></StopCard>
       ))}
     </Box>

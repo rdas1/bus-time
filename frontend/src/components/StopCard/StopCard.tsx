@@ -77,10 +77,7 @@ const getStopsAwayText = (arrivalData) => {
   return `${arrivalData.stopsAway} stops away`;
 }
 
-const StopCard: FC<StopCardProps> = ({ route, arrivalsAlongRoute, preOpened = false, stopInfo={} as StopInfo}) => {
-  
-  route = route || {} as RouteInfo; // TODO: handle invalid route'
-  arrivalsAlongRoute = arrivalsAlongRoute || [] as Arrival[]; // TODO: handle invalid arrivals
+const StopCard: FC<StopCardProps> = ({ route = {} as RouteInfo, arrivalsAlongRoute = [], preOpened = false, stopInfo = {} as StopInfo}) => {
   
   // Initialize isExpanded based on preOpened prop
   const [isExpanded, setIsExpanded] = useState(preOpened);
@@ -152,8 +149,8 @@ const StopCard: FC<StopCardProps> = ({ route, arrivalsAlongRoute, preOpened = fa
           <Box mt={4} mb={4}>
             <MapWidget stationPosition={stopLatLong} arrivalsAlongRoute={arrivalsAlongRoute}></MapWidget> 
           </Box>
-          {serviceAlerts.map((alert, index) => (
-            <ServiceAlertCard key={index} alert={alert}></ServiceAlertCard>
+          {serviceAlerts.map((alert) => (
+            <ServiceAlertCard key={alert.situationNumber} alert={alert}></ServiceAlertCard>
           ))}
         </Box>
       )}

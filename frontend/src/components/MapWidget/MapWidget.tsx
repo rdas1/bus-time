@@ -143,7 +143,7 @@ const MapWidget: FC<MapWidgetProps> = ({ stationPosition = [40.7128, -74.006], a
     };
 
     fetchPolyline();
-  }, []);
+  }, [route]);
 
   const busPositions = getBusPositions(arrivalsAlongRoute);
 

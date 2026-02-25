@@ -2,6 +2,25 @@ body {
   background-color: #40414F;
 }
 
+.top-container {
+  display: flex;
+  flex-direction: column;
+  height: 100dvh;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.main-content {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+}
+
+.main-content > * {
+  flex: 1;
+  overflow: hidden;
+}
+
 .App {
   text-align: center;
 }

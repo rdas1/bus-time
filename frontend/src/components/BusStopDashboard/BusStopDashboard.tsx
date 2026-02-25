@@ -1,5 +1,5 @@
-import {Box, Text } from '@chakra-ui/react';
-import React, { useEffect, useState } from 'react';
+import { Box, Text, useBreakpointValue } from '@chakra-ui/react';
+import React, { useEffect, useRef, useState } from 'react';
 import styles from './BusStopDashboard.module.scss';
 import { useParams } from 'react-router-dom';
 import StopLabel from '../StopLabel/StopLabel';
@@ -7,6 +7,7 @@ import StopCardsList from '../StopCardsList/StopCardsList';
 import LaterArrivalsSection from '../LaterArrivalsSection/LaterArrivalsSection';
 import AlertsSection from '../AlertsSection/AlertsSection';
 import axios from 'axios';
+import DashboardMap from '../DashboardMap/DashboardMap';
 
 export const REACT_APP_API_BASE_URL = process.env.REACT_APP_API_BASE_URL ?? "http://127.0.0.1:5000";
 
@@ -97,6 +98,16 @@ export const getStopsAlongRoute = async (routeId: string): Promise<any> => {
     throw error; // Rethrow for further handling if needed
   }
 }
+
+const polyUtil = require('polyline-encoded');
+
+export const getPolylinesAlongRoute = async (routeId: string): Promise<[number, number][][] | null> => {
+  if (!routeId) return [];
+  const normalizedId = routeId.replace('-SBS', '+');
+  const stopsAlongRoute = await getStopsAlongRoute(normalizedId);
+  if (!stopsAlongRoute || !stopsAlongRoute.polylines) return null;
+  return stopsAlongRoute.polylines.map((p: { points: string }) => polyUtil.decode(p.points));
+};
 
 const processName = (name: string): string => {
   name = name.replace("/", " / "); // Replace " - " with " & "
@@ -216,6 +227,8 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
   // const [stopName, setStopName] = useState<string | null>("Loading...");
   // const [routes, setRoutes] = useState<RouteInfo[]>([]);
   const [stopMonitoringData, setStopMonitoringData] = useState<Record<string, Arrival[]>>({} as Record<string, Arrival[]>);
+  const [secondsUntilRefresh, setSecondsUntilRefresh] = useState(30);
+  const lastFetchTimeRef = useRef<number>(Date.now());
 
   // Use the stopcode from props or fallback to a default value
   const stopCodeToUse = stopcode || "402506";
@@ -249,6 +262,7 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
       } catch (error) {
         console.error("Failed to fetch stop monitoring data:", error);
       }
+      lastFetchTimeRef.current = Date.now();
     };
 
     // Call immediately, then every 30 seconds
@@ -258,13 +272,50 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
     return () => clearInterval(intervalId); // Cleanup interval on unmount
   }, [stopCodeToUse]);
 
+  useEffect(() => {
+    const countdownId = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - lastFetchTimeRef.current) / 1000);
+      setSecondsUntilRefresh(Math.max(0, 30 - elapsed));
+    }, 1000);
+    return () => clearInterval(countdownId);
+  }, []);
+
+  const isDesktop = useBreakpointValue({ base: false, md: true });
+
   console.warn("stopInfo: ", stopInfo);
   return (
-    <Box className={styles.container}>
-      <StopLabel name={stopInfo.name}></StopLabel>
-      <StopCardsList routes={stopInfo.routes} arrivalsData={stopMonitoringData} preopenedRoute={preopenedRoute} stopInfo={stopInfo}></StopCardsList>
-      <LaterArrivalsSection routes={stopInfo.routes} arrivalsData={stopMonitoringData} stopInfo={stopInfo}></LaterArrivalsSection>
-      <AlertsSection arrivalsData={stopMonitoringData}></AlertsSection>
+    <Box
+      className={styles.container}
+      display="flex"
+      flexDirection={{ base: 'column', md: 'row' }}
+      h="100%"
+      overflow="hidden"
+    >
+      {/* LEFT: cards column, always visible */}
+      <Box
+        w={{ base: '100%', md: '400px' }}
+        flexShrink={0}
+        overflowY="auto"
+        px={4}
+        py={2}
+      >
+        <StopLabel name={stopInfo.name} secondsUntilRefresh={secondsUntilRefresh} />
+        <StopCardsList routes={stopInfo.routes} arrivalsData={stopMonitoringData} preopenedRoute={preopenedRoute} stopInfo={stopInfo} />
+        <LaterArrivalsSection routes={stopInfo.routes} arrivalsData={stopMonitoringData} stopInfo={stopInfo} />
+        <AlertsSection arrivalsData={stopMonitoringData} />
+      </Box>
+
+      {/* RIGHT: dashboard map, desktop only */}
+      {isDesktop && (
+        <Box flex={1} overflow="hidden" position="relative">
+          <DashboardMap
+            stopMonitoringData={stopMonitoringData}
+            stationPosition={
+              stopInfo.lat && stopInfo.lon ? [stopInfo.lat, stopInfo.lon] : undefined
+            }
+          />
+        </Box>
+      )}
     </Box>
   );
 };

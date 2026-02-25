@@ -23,7 +23,7 @@ function App() {
     <HashRouter>
       <Box className='top-container'>
         <NavBar />
-        <Box className="main-content" px={4}>
+        <Box className="main-content">
           <Routes>
             <Route 
               path="/" 

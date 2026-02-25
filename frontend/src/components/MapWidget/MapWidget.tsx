@@ -1,44 +1,20 @@
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useRef, useState } from 'react';
 import { Box } from '@chakra-ui/react';
 import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline } from 'react-leaflet';
 import L, { LatLngTuple } from 'leaflet';
 import 'leaflet-polylinedecorator';
-import { DirectionsBusFilledRounded as BusIcon, MyLocation as MyLocationIcon } from '@mui/icons-material';
+import { MyLocation as MyLocationIcon } from '@mui/icons-material';
 import ReactDOMServer from 'react-dom/server'; // Import ReactDOMServer for rendering to string
-import { Arrival, getStopsAlongRoute } from '../BusStopDashboard/BusStopDashboard';
-var polyUtil = require('polyline-encoded');
-// var encoded = "_p~iF~cn~U_ulLn{vA_mqNvxq`@";
-// var latlngs = polyUtil.decode(encoded);
-// console.log(latlngs);
-
-const getPolylinesAlongRoute = async (routeId: string) => {
-  if (!routeId) return [];
-  routeId = routeId.replace('-SBS', '+');
-  const stopsAlongRoute = await getStopsAlongRoute(routeId);
-  if (!stopsAlongRoute || !stopsAlongRoute.polylines) return null;
-  const latlngs = polyUtil.decode(stopsAlongRoute.polylines[0].points)
-  return latlngs;
-}
+import { Arrival, getPolylinesAlongRoute } from '../BusStopDashboard/BusStopDashboard';
+import { createLabeledBusIcon } from '../DashboardMap/DashboardMap';
+import { getRouteColor } from '../../utils/routeColors';
 
 // const getStopLocationsAlongRoute = async (routeId: string) => {
 
 // }
 
-const createCustomIcon = (icon: React.ReactNode, color: string) => {
-  const iconElement = ReactDOMServer.renderToString(
-    <div style={{ color: color, fontSize: '24px' }}>{icon}</div>
-  );
-
-  return L.divIcon({
-    className: 'custom-icon',
-    html: iconElement,
-    iconSize: [30, 30], // Adjust size as needed
-    iconAnchor: [15, 30], // Center the icon
-  });
-};
-
 // Create custom marker icons using Leaflet Awesome Markers
-const createStationIcon = (color: string = "black") => {
+export const createStationIcon = (color: string = "black") => {
   const iconElement = ReactDOMServer.renderToString(
     <div style={{ color: color, fontSize: '24px' }}>{<MyLocationIcon/>}</div>
   );
@@ -69,11 +45,13 @@ const getBusPositions = (arrivalsAlongRoute: Arrival[]) => {
 
 const MapBoundsSetter: FC<{ positions: LatLngTuple[] }> = ({ positions }) => {
   const map = useMap();
+  const hasFit = useRef(false);
 
   useEffect(() => {
-    if (positions.length > 0) {
+    if (!hasFit.current && positions.length > 0) {
       const bounds = L.latLngBounds(positions);
       map.fitBounds(bounds, { padding: [30, 30] });
+      hasFit.current = true;
     }
   }, [positions, map]);
 
@@ -131,25 +109,67 @@ function PolylineDecorator({ patterns, polyline,color }) {
 //   return polyline.length > 0 ? <Polyline positions={polyline} color="blue" /> : null;
 // };
 
+const ANIM_DURATION = 1500; // ms
+
 const MapWidget: FC<MapWidgetProps> = ({ stationPosition = [40.7128, -74.006], arrivalsAlongRoute = [] }) => {
 
   const route = arrivalsAlongRoute[0]?.route;
-  const [routePolyline, setRoutePolyline] = useState<LatLngTuple[]>([]);
+  const [routePolyline, setRoutePolyline] = useState<LatLngTuple[][]>([]);
 
   useEffect(() => {
     const fetchPolyline = async () => {
       const polyline = await getPolylinesAlongRoute(route);
-      setRoutePolyline(polyline);
+      if (polyline) setRoutePolyline(polyline as LatLngTuple[][]);
     };
 
     fetchPolyline();
   }, [route]);
 
-  const busPositions = getBusPositions(arrivalsAlongRoute);
+  const [displayPositions, setDisplayPositions] = useState<LatLngTuple[]>([]);
+  const displayPositionsRef = useRef<LatLngTuple[]>([]);
+  const animFromRef = useRef<LatLngTuple[]>([]);
+  const animStartRef = useRef<number>(0);
+  const animFrameRef = useRef<number | null>(null);
 
-  const nextBusPosition = busPositions[0];
-  // Collect positions for both the station and bus to set bounds
-  const stationAndBusPositions: LatLngTuple[] = [stationPosition, nextBusPosition];
+  useEffect(() => {
+    const targets = arrivalsAlongRoute.map(
+      a => [a.vehicleLat, a.vehicleLon] as LatLngTuple
+    );
+
+    // For new indices with no prior position, start at target (no animation from arbitrary origin)
+    animFromRef.current = targets.map((target, i) => displayPositionsRef.current[i] ?? target);
+
+    if (animFrameRef.current !== null) cancelAnimationFrame(animFrameRef.current);
+    animStartRef.current = performance.now();
+
+    const animate = (now: number) => {
+      const t = Math.min((now - animStartRef.current) / ANIM_DURATION, 1);
+      const eased = 1 - Math.pow(1 - t, 3); // cubic ease-out
+
+      const interpolated: LatLngTuple[] = targets.map((target, i) => {
+        const from = animFromRef.current[i] ?? target;
+        return [
+          from[0] + (target[0] - from[0]) * eased,
+          from[1] + (target[1] - from[1]) * eased,
+        ];
+      });
+
+      displayPositionsRef.current = interpolated;
+      setDisplayPositions([...interpolated]);
+
+      if (t < 1) animFrameRef.current = requestAnimationFrame(animate);
+    };
+
+    animFrameRef.current = requestAnimationFrame(animate);
+    return () => { if (animFrameRef.current !== null) cancelAnimationFrame(animFrameRef.current); };
+  }, [arrivalsAlongRoute]);
+
+  // Raw positions for bounds-fitting — must not use animated positions or the
+  // map re-fits on every animation frame (~60fps).
+  const rawNextBusPosition = arrivalsAlongRoute[0]
+    ? [arrivalsAlongRoute[0].vehicleLat, arrivalsAlongRoute[0].vehicleLon] as LatLngTuple
+    : stationPosition as LatLngTuple;
+  const stationAndBusPositions: LatLngTuple[] = [stationPosition, rawNextBusPosition];
 
   return (
     <Box h={72}>
@@ -158,18 +178,18 @@ const MapWidget: FC<MapWidgetProps> = ({ stationPosition = [40.7128, -74.006], a
         <Marker position={stationPosition} icon={createStationIcon()}>
           <Popup>The station</Popup>
         </Marker>
-        {/* <Marker position={nextBusPosition} icon={createCustomIcon(<BusIcon />, 'red')}>
-          <Popup>The next bus</Popup>
-        </Marker> */}
-        {busPositions.map((position, index) => (
-          <Marker key={index} position={position} icon={createCustomIcon(<BusIcon />, 'red')}>
-            {/* <Popup>The bus</Popup> */}
-          </Marker>
-        ))}
+        {arrivalsAlongRoute.map((arrival, index) => {
+          const pos = displayPositions[index] ?? [arrival.vehicleLat, arrival.vehicleLon] as LatLngTuple;
+          return (
+            <Marker key={index} position={pos} icon={createLabeledBusIcon(arrival.route)}>
+              {/* <Popup>The bus</Popup> */}
+            </Marker>
+          );
+        })}
         <MapBoundsSetter positions={stationAndBusPositions} />
-        {routePolyline && (
-          <Polyline positions={routePolyline} color="blue" weight={2} opacity={0.7} />
-        )}
+        {routePolyline.map((seg, i) => (
+          <Polyline key={i} positions={seg} color={getRouteColor(route)} weight={2} opacity={0.7} />
+        ))}
         {/* <RoutePolyline routeId={route} /> */}
       </MapContainer>
     </Box>

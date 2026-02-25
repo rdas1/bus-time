@@ -20,10 +20,7 @@ interface LaterArrivalsSectionProps {
 //   return slicedArrivalsData as Record<string, Arrival[]>;
 // }
 
-const LaterArrivalsSection: FC<LaterArrivalsSectionProps> = ({routes, arrivalsData, stopInfo}) => {
-  routes = routes || [];
-  arrivalsData = arrivalsData || {} as Record<string, Arrival[]>;
-  stopInfo = stopInfo || {} as StopInfo;
+const LaterArrivalsSection: FC<LaterArrivalsSectionProps> = ({routes = [], arrivalsData = {}, stopInfo = {} as StopInfo}) => {
   // if (arrivalsData) {
   //   console.log("arrivalsData before", Object.keys(arrivalsData));
   //   arrivalsData = removeFirstArrival(arrivalsData);
@@ -39,8 +36,8 @@ const LaterArrivalsSection: FC<LaterArrivalsSectionProps> = ({routes, arrivalsDa
         <Text fontWeight={"bold"}>Later Arrivals:</Text> {/* Using Text component for better semantics */}      
       </Box>
       <Box className={styles.routes} px={2}>
-        {routes.map((route, index) => (
-          <StopCard key={index} route={route} arrivalsAlongRoute={(arrivalsData[route.shortName])?.slice(1) || []} stopInfo={stopInfo}></StopCard>
+        {routes.map((route) => (
+          <StopCard key={route.id} route={route} arrivalsAlongRoute={(arrivalsData[route.shortName])?.slice(1) || []} stopInfo={stopInfo}></StopCard>
         ))}
       </Box>
     </Box>

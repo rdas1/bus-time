@@ -1,10 +1,8 @@
-import React, { FC } from 'react';
+import React, { FC, useMemo } from 'react';
 import styles from './AlertsSection.module.scss';
 import { Box, Text } from '@chakra-ui/react';
-import StopCard from '../StopCard/StopCard';
-import { AlertInfo, Arrival, RouteInfo, StopInfo } from '../BusStopDashboard/BusStopDashboard';
+import { AlertInfo, Arrival } from '../BusStopDashboard/BusStopDashboard';
 import ServiceAlertCard from '../ServiceAlertCard/ServiceAlertCard';
-import { get } from 'http';
 
 interface AlertsSectionProps {
   arrivalsData?: Record<string, Arrival[]>; // TODO: create types for this
@@ -34,7 +32,7 @@ const getAlerts = (arrivalsData: Record<string, Arrival[]>): AlertInfo[] => {
 
 const AlertsSection: FC<AlertsSectionProps> = ({arrivalsData}) => {
 
-  const serviceAlerts: AlertInfo[] = getAlerts(arrivalsData || {} as Record<string, Arrival[]>);
+  const serviceAlerts = useMemo(() => getAlerts(arrivalsData ?? {}), [arrivalsData]);
 
   return (
     <Box my={2} pb={6}>
@@ -46,37 +44,13 @@ const AlertsSection: FC<AlertsSectionProps> = ({arrivalsData}) => {
         <Text fontWeight={"bold"}>Service Alerts:</Text> {/* Using Text component for better semantics */}      
       </Box>
       <Box className={styles.routes} px={2}>
-        {serviceAlerts.map((alert, index) => (
-          <ServiceAlertCard key={index} alert={alert}></ServiceAlertCard>
+        {serviceAlerts.map((alert) => (
+          <ServiceAlertCard key={alert.situationNumber} alert={alert}></ServiceAlertCard>
         ))}
       </Box>
-      {/* <Box className={styles.routes} px={2}>
-          {routes.map((routeInfo, index) => (
-            <StopCard key={index} route={routeInfo} arrivalsAlongRoute={arrivalsData[routeInfo.shortName] || [] as Arrival[]} stopInfo={stopInfo}></StopCard>
-          ))}
-        </Box> */}
     </Box>
 
   );
-  // routes = routes || [];
-  // arrivalsData = arrivalsData || {} as Record<string, Arrival[]>;
-  // stopInfo = stopInfo || {} as StopInfo;
-  // return (
-  //   <Box>
-  //     <Box  
-  //       color="white" // Text color
-  //       fontSize="xl" // Set font size (you can also use values like '2xl', etc.)
-  //       px={3}         // Padding
-  //     >
-  //       <Text fontWeight={"bold"}>Service Alerts:</Text> {/* Using Text component for better semantics */}      
-  //     </Box>
-  //     <Box className={styles.routes} px={2}>
-  //         {routes.map((routeInfo, index) => (
-  //           <StopCard key={index} route={routeInfo} arrivalsAlongRoute={arrivalsData[routeInfo.shortName] || [] as Arrival[]} stopInfo={stopInfo}></StopCard>
-  //         ))}
-  //       </Box>
-  //   </Box>
-  // );
 }
 
 

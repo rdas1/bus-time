@@ -10,15 +10,15 @@ import { createStationIcon } from '../MapWidget/MapWidget';
 const tileLayerUrl = `https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=${process.env.REACT_APP_STADIA_MAPS_API_KEY}`;
 const tileLayerAttribution = `'&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'`;
 
-const createLabeledBusIcon = (routeShortName: string): L.DivIcon => {
+export const createLabeledBusIcon = (routeShortName: string): L.DivIcon => {
   const busIconHtml = ReactDOMServer.renderToString(
-    <BusIcon style={{ color: '#cc0000', fontSize: '24px', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))' }} />
+    <BusIcon style={{ color: '#0039a6', fontSize: '24px', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))' }} />
   );
   return L.divIcon({
     className: '',
     html: `
       <div style="display:flex;flex-direction:column;align-items:center;gap:1px;">
-        <div style="background:#cc0000;color:white;font-size:10px;font-weight:bold;
+        <div style="background:#0039a6;color:white;font-size:10px;font-weight:bold;
                     font-family:Helvetica,Arial,sans-serif;padding:1px 4px;
                     border-radius:3px;white-space:nowrap;
                     box-shadow:0 1px 3px rgba(0,0,0,0.5);">${routeShortName}</div>
@@ -49,7 +49,7 @@ interface DashboardMapProps {
 const ANIM_DURATION = 1500; // ms
 
 const DashboardMap: FC<DashboardMapProps> = ({ stopMonitoringData, stationPosition }) => {
-  const [routePolylines, setRoutePolylines] = useState<Record<string, LatLngTuple[]>>({});
+  const [routePolylines, setRoutePolylines] = useState<Record<string, LatLngTuple[][]>>({});
 
   const [displayPositions, setDisplayPositions] = useState<Record<string, LatLngTuple>>({});
   const displayPositionsRef = useRef<Record<string, LatLngTuple>>({});
@@ -63,7 +63,7 @@ const DashboardMap: FC<DashboardMapProps> = ({ stopMonitoringData, stationPositi
     Promise.all(missingRoutes.map(async id => ({ id, poly: await getPolylinesAlongRoute(id) })))
       .then(results => setRoutePolylines(prev => {
         const next = { ...prev };
-        results.forEach(({ id, poly }) => { if (poly) next[id] = poly as LatLngTuple[]; });
+        results.forEach(({ id, poly }) => { if (poly) next[id] = poly as LatLngTuple[][]; });
         return next;
       }));
   }, [stopMonitoringData]); // intentionally excludes routePolylines to avoid infinite loop
@@ -139,9 +139,11 @@ const DashboardMap: FC<DashboardMapProps> = ({ stopMonitoringData, stationPositi
             );
           })
         )}
-        {Object.entries(routePolylines).map(([routeId, poly]) => (
-          <Polyline key={routeId} positions={poly} color="blue" weight={2} opacity={0.6} />
-        ))}
+        {Object.entries(routePolylines).flatMap(([routeId, segments]) =>
+          segments.map((seg, i) => (
+            <Polyline key={`${routeId}-${i}`} positions={seg} color="blue" weight={2} opacity={0.6} />
+          ))
+        )}
         <MapBoundsSetter positions={allPositions} />
       </MapContainer>
     </Box>

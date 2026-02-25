@@ -101,12 +101,12 @@ export const getStopsAlongRoute = async (routeId: string): Promise<any> => {
 
 const polyUtil = require('polyline-encoded');
 
-export const getPolylinesAlongRoute = async (routeId: string): Promise<[number, number][] | null> => {
+export const getPolylinesAlongRoute = async (routeId: string): Promise<[number, number][][] | null> => {
   if (!routeId) return [];
   const normalizedId = routeId.replace('-SBS', '+');
   const stopsAlongRoute = await getStopsAlongRoute(normalizedId);
   if (!stopsAlongRoute || !stopsAlongRoute.polylines) return null;
-  return polyUtil.decode(stopsAlongRoute.polylines[0].points);
+  return stopsAlongRoute.polylines.map((p: { points: string }) => polyUtil.decode(p.points));
 };
 
 const processName = (name: string): string => {

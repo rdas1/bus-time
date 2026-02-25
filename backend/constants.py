@@ -8,3 +8,4 @@ MINIMUM_STOP_VISITS_PER_LINE = 3
 
 STOPS_ALONG_ROUTE_URL = "https://bustime.mta.info/api/where/stops-for-route/MTA%20NYCT_{route_id}.json"
 STOP_STATIC_INFO_URL = "https://bustime.mta.info/api/where/stop/MTA_{stop_id}.json"
+STOPS_FOR_LOCATION_URL = "https://bustime.mta.info/api/where/stops-for-location.json"

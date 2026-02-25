@@ -1,10 +1,11 @@
 import React, { FC, useEffect, useRef, useState } from 'react';
 import { Box } from '@chakra-ui/react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, Tooltip, useMap } from 'react-leaflet';
+import { useNavigate } from 'react-router-dom';
 import L, { LatLngTuple } from 'leaflet';
 import { DirectionsBusFilledRounded as BusIcon } from '@mui/icons-material';
 import ReactDOMServer from 'react-dom/server';
-import { Arrival, getPolylinesAlongRoute } from '../BusStopDashboard/BusStopDashboard';
+import { Arrival, getPolylinesAlongRoute, getNearbyStops, NearbyStop } from '../BusStopDashboard/BusStopDashboard';
 import { createStationIcon } from '../MapWidget/MapWidget';
 import { getRouteColor } from '../../utils/routeColors';
 
@@ -46,12 +47,20 @@ const MapBoundsSetter: FC<{ positions: LatLngTuple[] }> = ({ positions }) => {
 interface DashboardMapProps {
   stopMonitoringData: Record<string, Arrival[]>;
   stationPosition?: [number, number];
+  currentStopCode?: string;
 }
 
 const ANIM_DURATION = 1500; // ms
 
-const DashboardMap: FC<DashboardMapProps> = ({ stopMonitoringData, stationPosition }) => {
+const DashboardMap: FC<DashboardMapProps> = ({ stopMonitoringData, stationPosition, currentStopCode }) => {
+  const navigate = useNavigate();
   const [routePolylines, setRoutePolylines] = useState<Record<string, LatLngTuple[][]>>({});
+  const [nearbyStops, setNearbyStops] = useState<NearbyStop[]>([]);
+
+  useEffect(() => {
+    if (!stationPosition) return;
+    getNearbyStops(stationPosition[0], stationPosition[1]).then(setNearbyStops);
+  }, [stationPosition]);
 
   const [displayPositions, setDisplayPositions] = useState<Record<string, LatLngTuple>>({});
   const displayPositionsRef = useRef<Record<string, LatLngTuple>>({});
@@ -125,6 +134,20 @@ const DashboardMap: FC<DashboardMapProps> = ({ stopMonitoringData, stationPositi
         style={{ height: '100%', width: '100%' }}
       >
         <TileLayer url={tileLayerUrl} attribution={tileLayerAttribution} />
+        {nearbyStops
+          .filter(stop => stop.code !== currentStopCode)
+          .map(stop => (
+            <CircleMarker
+              key={stop.id}
+              center={[stop.lat, stop.lon]}
+              radius={7}
+              pathOptions={{ color: '#444', fillColor: 'white', fillOpacity: 1, weight: 2 }}
+              eventHandlers={{ click: () => navigate(`/${stop.code}`) }}
+            >
+              <Tooltip direction="top" offset={[0, -8]}>{stop.name}</Tooltip>
+            </CircleMarker>
+          ))
+        }
         {stationPosition && (
           <Marker position={stationPosition} icon={createStationIcon()}>
             <Popup>Your stop</Popup>

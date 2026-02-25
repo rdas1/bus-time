@@ -14,3 +14,4 @@ yarn-error.log*
 .npm/
 backend/old_python_stuff/
 backend/db
+.claude/

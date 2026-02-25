@@ -7,6 +7,7 @@ import { MyLocation as MyLocationIcon } from '@mui/icons-material';
 import ReactDOMServer from 'react-dom/server'; // Import ReactDOMServer for rendering to string
 import { Arrival, getPolylinesAlongRoute } from '../BusStopDashboard/BusStopDashboard';
 import { createLabeledBusIcon } from '../DashboardMap/DashboardMap';
+import { getRouteColor } from '../../utils/routeColors';
 
 // const getStopLocationsAlongRoute = async (routeId: string) => {
 
@@ -187,7 +188,7 @@ const MapWidget: FC<MapWidgetProps> = ({ stationPosition = [40.7128, -74.006], a
         })}
         <MapBoundsSetter positions={stationAndBusPositions} />
         {routePolyline.map((seg, i) => (
-          <Polyline key={i} positions={seg} color="blue" weight={2} opacity={0.7} />
+          <Polyline key={i} positions={seg} color={getRouteColor(route)} weight={2} opacity={0.7} />
         ))}
         {/* <RoutePolyline routeId={route} /> */}
       </MapContainer>

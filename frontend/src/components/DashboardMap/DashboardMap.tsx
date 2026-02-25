@@ -6,19 +6,21 @@ import { DirectionsBusFilledRounded as BusIcon } from '@mui/icons-material';
 import ReactDOMServer from 'react-dom/server';
 import { Arrival, getPolylinesAlongRoute } from '../BusStopDashboard/BusStopDashboard';
 import { createStationIcon } from '../MapWidget/MapWidget';
+import { getRouteColor } from '../../utils/routeColors';
 
 const tileLayerUrl = `https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=${process.env.REACT_APP_STADIA_MAPS_API_KEY}`;
 const tileLayerAttribution = `'&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'`;
 
 export const createLabeledBusIcon = (routeShortName: string): L.DivIcon => {
+  const color = getRouteColor(routeShortName);
   const busIconHtml = ReactDOMServer.renderToString(
-    <BusIcon style={{ color: '#0039a6', fontSize: '24px', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))' }} />
+    <BusIcon style={{ color, fontSize: '24px', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))' }} />
   );
   return L.divIcon({
     className: '',
     html: `
       <div style="display:flex;flex-direction:column;align-items:center;gap:1px;">
-        <div style="background:#0039a6;color:white;font-size:10px;font-weight:bold;
+        <div style="background:${color};color:white;font-size:10px;font-weight:bold;
                     font-family:Helvetica,Arial,sans-serif;padding:1px 4px;
                     border-radius:3px;white-space:nowrap;
                     box-shadow:0 1px 3px rgba(0,0,0,0.5);">${routeShortName}</div>
@@ -141,7 +143,7 @@ const DashboardMap: FC<DashboardMapProps> = ({ stopMonitoringData, stationPositi
         )}
         {Object.entries(routePolylines).flatMap(([routeId, segments]) =>
           segments.map((seg, i) => (
-            <Polyline key={`${routeId}-${i}`} positions={seg} color="blue" weight={2} opacity={0.6} />
+            <Polyline key={`${routeId}-${i}`} positions={seg} color={getRouteColor(routeId)} weight={2} opacity={0.6} />
           ))
         )}
         <MapBoundsSetter positions={allPositions} />

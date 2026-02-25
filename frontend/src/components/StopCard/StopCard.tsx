@@ -3,6 +3,7 @@ import styles from './StopCard.module.scss';
 import { Box, Button, Text, Flex } from '@chakra-ui/react';
 import { FiChevronDown, FiChevronUp } from 'react-icons/fi';
 import { RouteInfo, Arrival, getMinutesAway, StopInfo, AlertInfo } from '../BusStopDashboard/BusStopDashboard';
+import { getRouteColor } from '../../utils/routeColors';
 import MapWidget from '../MapWidget/MapWidget';
 import ServiceAlertCard from '../ServiceAlertCard/ServiceAlertCard';
 
@@ -121,7 +122,19 @@ const StopCard: FC<StopCardProps> = ({ route = {} as RouteInfo, arrivalsAlongRou
           
           {/* Left-aligned route name */}
           <Flex direction="column" align="flex-start" minW={40}>
-            <Text fontSize="lg">{route.shortName}</Text> {/* TODO: Display blue pill icon for bus routes */}
+            <Box
+              bg={getRouteColor(route.shortName)}
+              color="white"
+              fontSize="md"
+              fontWeight="bold"
+              px={2}
+              py={0.5}
+              borderRadius="md"
+              fontFamily="Helvetica, Arial, sans-serif"
+              display="inline-block"
+            >
+              {route.shortName}
+            </Box>
             <Text lineClamp={2} text-wrap="wrap" overflow={isExpanded ? "visible" : "visible"} fontSize="sm" textAlign="left" fontWeight="300">to {destinationText}</Text>
           </Flex>
 

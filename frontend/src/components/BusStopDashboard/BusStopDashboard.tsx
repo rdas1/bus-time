@@ -396,12 +396,13 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
         minH={0}
         overflowY="auto"
         px={4}
-        py={2}
       >
-        <StopLabel name={stopInfo.name} secondsUntilRefresh={secondsUntilRefresh} />
-        <StopCardsList routes={stopInfo.routes} arrivalsData={stopMonitoringData} preopenedRoute={preopenedRoute} stopInfo={stopInfo} />
-        <LaterArrivalsSection routes={stopInfo.routes} arrivalsData={stopMonitoringData} stopInfo={stopInfo} />
-        <AlertsSection arrivalsData={stopMonitoringData} />
+        <Box>
+          <StopLabel name={stopInfo.name} secondsUntilRefresh={secondsUntilRefresh} />
+          <StopCardsList routes={stopInfo.routes} arrivalsData={stopMonitoringData} preopenedRoute={preopenedRoute} stopInfo={stopInfo} />
+          <LaterArrivalsSection routes={stopInfo.routes} arrivalsData={stopMonitoringData} stopInfo={stopInfo} />
+          <AlertsSection arrivalsData={stopMonitoringData} />
+        </Box>
 
         {sortedNearbyStops.map(stop => {
           const arrivals = nearbyArrivals[stop.code];

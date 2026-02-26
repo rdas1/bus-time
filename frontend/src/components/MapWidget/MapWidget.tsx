@@ -190,7 +190,7 @@ const MapWidget: FC<MapWidgetProps> = ({ stationPosition = [40.7128, -74.006], a
         {arrivalsAlongRoute.map((arrival, index) => {
           const pos = displayPositions[index] ?? [arrival.vehicleLat, arrival.vehicleLon] as LatLngTuple;
           return (
-            <Marker key={index} position={pos} icon={createLabeledBusIcon(arrival.route)}>
+            <Marker key={index} position={pos} icon={createLabeledBusIcon(arrival.route, arrival.vehicleBearing)}>
               {/* <Popup>The bus</Popup> */}
             </Marker>
           );

@@ -12,15 +12,23 @@ import { getRouteColor } from '../../utils/routeColors';
 const tileLayerUrl = `https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png?api_key=${process.env.REACT_APP_STADIA_MAPS_API_KEY}`;
 const tileLayerAttribution = `'&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors'`;
 
-export const createLabeledBusIcon = (routeShortName: string): L.DivIcon => {
+export const createLabeledBusIcon = (routeShortName: string, bearing?: number): L.DivIcon => {
   const color = getRouteColor(routeShortName);
   const busIconHtml = ReactDOMServer.renderToString(
     <BusIcon style={{ color, fontSize: '24px', filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.5))' }} />
   );
+  const arrowHtml = bearing != null ? `
+    <svg width="12" height="12" viewBox="-6 -6 12 12" overflow="visible"
+         style="position:absolute;top:-16px;left:50%;
+                transform:translateX(-50%) rotate(${bearing}deg);
+                filter:drop-shadow(0 1px 2px rgba(0,0,0,0.5));">
+      <polygon points="0,-5 4,3 0,1 -4,3" fill="${color}" stroke="white" stroke-width="0.8" />
+    </svg>` : '';
   return L.divIcon({
     className: '',
     html: `
-      <div style="display:flex;flex-direction:column;align-items:center;gap:1px;">
+      <div style="position:relative;display:inline-flex;flex-direction:column;align-items:center;gap:1px;">
+        ${arrowHtml}
         <div style="background:${color};color:white;font-size:10px;font-weight:bold;
                     font-family:Helvetica,Arial,sans-serif;padding:1px 4px;
                     border-radius:3px;white-space:nowrap;
@@ -185,7 +193,7 @@ const DashboardMap: FC<DashboardMapProps> = ({ stopMonitoringData, stationPositi
             const key = `${routeName}-${i}`;
             const pos = displayPositions[key] ?? [arrival.vehicleLat, arrival.vehicleLon];
             return (
-              <Marker key={key} position={pos} icon={createLabeledBusIcon(routeName)}>
+              <Marker key={key} position={pos} icon={createLabeledBusIcon(routeName, arrival.vehicleBearing)}>
                 <Popup>{routeName} — {arrival.destination}</Popup>
               </Marker>
             );

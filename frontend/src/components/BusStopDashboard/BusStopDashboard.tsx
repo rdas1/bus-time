@@ -309,6 +309,15 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
   );
 
   console.warn("stopInfo: ", stopInfo);
+
+  const dashboardMap = (
+    <DashboardMap
+      stopMonitoringData={stopMonitoringData}
+      stationPosition={stationPosition}
+      currentStopCode={stopCodeToUse}
+    />
+  );
+
   return (
     <Box
       className={styles.container}
@@ -317,10 +326,19 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
       h="100%"
       overflow="hidden"
     >
-      {/* LEFT: cards column, always visible */}
+      {/* MOBILE: map above cards, fixed height */}
+      {!isDesktop && (
+        <Box h="250px" flexShrink={0} position="relative">
+          {dashboardMap}
+        </Box>
+      )}
+
+      {/* LEFT: cards column */}
       <Box
         w={{ base: '100%', md: '400px' }}
         flexShrink={0}
+        flex={{ base: 1, md: 'none' }}
+        minH={0}
         overflowY="auto"
         px={4}
         py={2}
@@ -331,14 +349,10 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
         <AlertsSection arrivalsData={stopMonitoringData} />
       </Box>
 
-      {/* RIGHT: dashboard map, desktop only */}
+      {/* RIGHT: map, desktop only */}
       {isDesktop && (
         <Box flex={1} overflow="hidden" position="relative">
-          <DashboardMap
-            stopMonitoringData={stopMonitoringData}
-            stationPosition={stationPosition}
-            currentStopCode={stopCodeToUse}
-          />
+          {dashboardMap}
         </Box>
       )}
     </Box>

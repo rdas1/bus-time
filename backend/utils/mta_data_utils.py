@@ -73,6 +73,26 @@ def get_stops_for_location(lat, lon, radius=500):
     else:
         return {"error": "Failed to fetch data", "status_code": response.status_code}
 
+# Bounding box that covers all five NYC boroughs with a small margin
+_NYC_LAT = 40.7128
+_NYC_LON = -73.9900
+_NYC_LAT_SPAN = 0.52   # ~40.45 – 40.97 N
+_NYC_LON_SPAN = 0.68   # ~-74.33 – -73.31 W
+
+def get_all_stops():
+    params = {
+        'key': MTA_API_KEY,
+        'lat': _NYC_LAT,
+        'lon': _NYC_LON,
+        'latSpan': _NYC_LAT_SPAN,
+        'lonSpan': _NYC_LON_SPAN,
+    }
+    response = requests.get(STOPS_FOR_LOCATION_URL, params=params)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return {"error": "Failed to fetch data", "status_code": response.status_code}
+
 def get_data():
     # Placeholder for data-fetching logic
     return {"message": "Hello from Flask!"}

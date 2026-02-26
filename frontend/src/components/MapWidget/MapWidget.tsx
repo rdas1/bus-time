@@ -172,8 +172,17 @@ const MapWidget: FC<MapWidgetProps> = ({ stationPosition = [40.7128, -74.006], a
   const stationAndBusPositions: LatLngTuple[] = [stationPosition, rawNextBusPosition];
 
   return (
-    <Box h={72}>
-      <MapContainer center={stationPosition} zoomControl={false} style={{ height: '100%', width: '100%' }}>
+    <Box h={72} borderRadius="xl" overflow="hidden" zIndex={1} position="relative">
+      <MapContainer
+        center={stationPosition}
+        zoomControl={false}
+        scrollWheelZoom={false}
+        dragging={false}
+        touchZoom={false}
+        doubleClickZoom={false}
+        keyboard={false}
+        style={{ height: '100%', width: '100%' }}
+      >
         <TileLayer url={tileLayerUrl} attribution={tileLayerAttribution} />
         <Marker position={stationPosition} icon={createStationIcon()}>
           <Popup>The station</Popup>
@@ -181,7 +190,7 @@ const MapWidget: FC<MapWidgetProps> = ({ stationPosition = [40.7128, -74.006], a
         {arrivalsAlongRoute.map((arrival, index) => {
           const pos = displayPositions[index] ?? [arrival.vehicleLat, arrival.vehicleLon] as LatLngTuple;
           return (
-            <Marker key={index} position={pos} icon={createLabeledBusIcon(arrival.route)}>
+            <Marker key={index} position={pos} icon={createLabeledBusIcon(arrival.route, arrival.vehicleBearing)}>
               {/* <Popup>The bus</Popup> */}
             </Marker>
           );

@@ -19,6 +19,9 @@ const StopLabel: FC<StopLabelProps> = ({ name, secondsUntilRefresh }) => (
     borderRadius="md" // Optional: Add rounded corners
     // boxShadow="sm"
     textAlign="left" // Center text alignment // TODO: add support for RTL languages
+    position="sticky"
+    top={0}
+    zIndex={2}
   >
     <Flex align="center" justify="space-between">
       <Text fontWeight="medium">{name}</Text>

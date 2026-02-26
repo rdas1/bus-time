@@ -69,13 +69,26 @@ export interface NearbyStop {
   lon: number;
 }
 
+const CACHE_TTL_MS = 30_000;
+
+interface NearbyStopsCacheEntry {
+  stops: NearbyStop[];
+  fetchedAt: number;
+}
+const nearbyStopsCache: Record<string, NearbyStopsCacheEntry> = {};
+
 export const getNearbyStops = async (lat: number, lon: number): Promise<NearbyStop[]> => {
+  const key = `${lat.toFixed(3)},${lon.toFixed(3)}`;
+  const cached = nearbyStopsCache[key];
+  if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
+    return cached.stops;
+  }
   try {
-    const response = await axios.get(`${REACT_APP_API_BASE_URL}/api/stops/nearby`, {
-      params: { lat, lon },
-    });
+    const response = await axios.get(`${REACT_APP_API_BASE_URL}/api/stops/nearby`, { params: { lat, lon } });
     const list: any[] = response.data?.data?.stops ?? [];
-    return list.map(s => ({ id: s.id, code: s.code, name: s.name, lat: s.lat, lon: s.lon }));
+    const stops = list.map(s => ({ id: s.id, code: s.code, name: s.name, lat: s.lat, lon: s.lon }));
+    nearbyStopsCache[key] = { stops, fetchedAt: Date.now() };
+    return stops;
   } catch (err) {
     console.error('[getNearbyStops] Error:', err);
     return [];
@@ -242,6 +255,40 @@ const parseStopMonitoringResponse = (apiData): Record<string, Arrival[]> => {
   return parsed;
 }
 
+// ---------------------------------------------------------------------------
+// In-memory arrivals cache
+// ---------------------------------------------------------------------------
+interface CacheEntry {
+  data: Record<string, Arrival[]>;
+  fetchedAt: number;
+}
+
+const stopArrivalsCache: Record<string, CacheEntry> = {};
+const inFlightArrivals: Record<string, Promise<Record<string, Arrival[]>>> = {};
+
+const getCachedArrivals = async (stopCode: string): Promise<Record<string, Arrival[]>> => {
+  const cached = stopArrivalsCache[stopCode];
+  if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
+    return cached.data;
+  }
+  if (inFlightArrivals[stopCode]) {
+    return inFlightArrivals[stopCode];
+  }
+  const fetchPromise = (async () => {
+    try {
+      const raw = await getStopMonitoring(stopCode);
+      const parsed = parseStopMonitoringResponse(raw);
+      stopArrivalsCache[stopCode] = { data: parsed, fetchedAt: Date.now() };
+      return parsed;
+    } finally {
+      delete inFlightArrivals[stopCode];
+    }
+  })();
+  inFlightArrivals[stopCode] = fetchPromise;
+  return fetchPromise;
+};
+// ---------------------------------------------------------------------------
+
 const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopenedRoute }) => {
 
   const [stopInfo, setStopInfo] = useState<StopInfo>({} as StopInfo);
@@ -250,6 +297,8 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
   const [stopMonitoringData, setStopMonitoringData] = useState<Record<string, Arrival[]>>({} as Record<string, Arrival[]>);
   const [secondsUntilRefresh, setSecondsUntilRefresh] = useState(30);
   const lastFetchTimeRef = useRef<number>(Date.now());
+  const [nearbyStops, setNearbyStops] = useState<NearbyStop[]>([]);
+  const [nearbyArrivals, setNearbyArrivals] = useState<Record<string, Record<string, Arrival[]>>>({});
 
   // Use the stopcode from props or fallback to a default value
   const stopCodeToUse = stopcode || "402506";
@@ -276,10 +325,9 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
 
   useEffect(() => {
     const fetchStopMonitoringData = async () => {
-      console.log("Fetching arrivals data...")
       try {
-        const data = await getStopMonitoring(stopCodeToUse);
-        setStopMonitoringData(parseStopMonitoringResponse(data));
+        const data = await getCachedArrivals(stopCodeToUse);
+        setStopMonitoringData(data);
       } catch (error) {
         console.error("Failed to fetch stop monitoring data:", error);
       }
@@ -308,7 +356,67 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
     [stopInfo.lat, stopInfo.lon]
   );
 
-  console.warn("stopInfo: ", stopInfo);
+  useEffect(() => {
+    if (!stationPosition) return;
+    getNearbyStops(stationPosition[0], stationPosition[1]).then(setNearbyStops);
+  }, [stationPosition]);
+
+  useEffect(() => {
+    const otherStops = nearbyStops.filter(s => s.code !== stopCodeToUse);
+    if (otherStops.length === 0) return;
+    const fetchNearbyArrivals = async () => {
+      const results = await Promise.all(
+        otherStops.map(async stop => {
+          try {
+            const data = await getCachedArrivals(stop.code);
+            return [stop.code, data] as const;
+          } catch {
+            return [stop.code, {} as Record<string, Arrival[]>] as const;
+          }
+        })
+      );
+      setNearbyArrivals(Object.fromEntries(results));
+    };
+    fetchNearbyArrivals();
+    const id = setInterval(fetchNearbyArrivals, 30000);
+    return () => clearInterval(id);
+  }, [nearbyStops, stopCodeToUse]);
+
+  const approxDistanceM = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const dLat = (lat2 - lat1) * 111000;
+    const dLon = (lon2 - lon1) * Math.cos(lat1 * Math.PI / 180) * 111000;
+    return Math.sqrt(dLat ** 2 + dLon ** 2);
+  };
+
+  // Build a minimal RouteInfo[] from an arrivals record, sorted by soonest first
+  const routesFromArrivals = (arrivals: Record<string, Arrival[]>): RouteInfo[] =>
+    Object.entries(arrivals)
+      .sort(([, a], [, b]) => {
+        const aTime = a[0]?.arrivalTime;
+        const bTime = b[0]?.arrivalTime;
+        if (!aTime && !bTime) return 0;
+        if (!aTime) return 1;
+        if (!bTime) return -1;
+        return new Date(aTime).getTime() - new Date(bTime).getTime();
+      })
+      .map(([shortName]) => ({ id: shortName, shortName, longName: '', description: '', destination: '' } as RouteInfo));
+
+  const sortedNearbyStops = nearbyStops
+    .filter(s => s.code !== stopCodeToUse)
+    .sort((a, b) => {
+      if (!stationPosition) return 0;
+      const [lat, lon] = stationPosition;
+      return approxDistanceM(lat, lon, a.lat, a.lon) - approxDistanceM(lat, lon, b.lat, b.lon);
+    });
+
+  const dashboardMap = (
+    <DashboardMap
+      stopMonitoringData={stopMonitoringData}
+      stationPosition={stationPosition}
+      currentStopCode={stopCodeToUse}
+    />
+  );
+
   return (
     <Box
       className={styles.container}
@@ -317,28 +425,54 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
       h="100%"
       overflow="hidden"
     >
-      {/* LEFT: cards column, always visible */}
+      {/* MOBILE: map above cards, fixed height */}
+      {!isDesktop && (
+        <Box h="250px" flexShrink={0} p={2}>
+          <Box h="100%" borderRadius="xl" overflow="hidden">
+            {dashboardMap}
+          </Box>
+        </Box>
+      )}
+
+      {/* LEFT: cards column */}
       <Box
         w={{ base: '100%', md: '400px' }}
         flexShrink={0}
+        flex={{ base: 1, md: 'none' }}
+        minH={0}
         overflowY="auto"
         px={4}
-        py={2}
       >
-        <StopLabel name={stopInfo.name} secondsUntilRefresh={secondsUntilRefresh} />
-        <StopCardsList routes={stopInfo.routes} arrivalsData={stopMonitoringData} preopenedRoute={preopenedRoute} stopInfo={stopInfo} />
-        <LaterArrivalsSection routes={stopInfo.routes} arrivalsData={stopMonitoringData} stopInfo={stopInfo} />
-        <AlertsSection arrivalsData={stopMonitoringData} />
+        <Box>
+          <StopLabel name={stopInfo.name} secondsUntilRefresh={secondsUntilRefresh} />
+          <StopCardsList routes={stopInfo.routes} arrivalsData={stopMonitoringData} preopenedRoute={preopenedRoute} stopInfo={stopInfo} />
+          <LaterArrivalsSection routes={stopInfo.routes} arrivalsData={stopMonitoringData} stopInfo={stopInfo} />
+          <AlertsSection arrivalsData={stopMonitoringData} />
+        </Box>
+
+        {sortedNearbyStops.map(stop => {
+          const arrivals = nearbyArrivals[stop.code];
+          if (!arrivals || Object.keys(arrivals).length === 0) return null;
+          const nearbyStopInfo: StopInfo = { id: stop.id, name: stop.name, routes: [], lat: stop.lat, lon: stop.lon };
+          return (
+            <Box key={stop.code} mt={2}>
+              <StopLabel name={stop.name} />
+              <StopCardsList
+                routes={routesFromArrivals(arrivals)}
+                arrivalsData={arrivals}
+                stopInfo={nearbyStopInfo}
+              />
+            </Box>
+          );
+        })}
       </Box>
 
-      {/* RIGHT: dashboard map, desktop only */}
+      {/* RIGHT: map, desktop only */}
       {isDesktop && (
-        <Box flex={1} overflow="hidden" position="relative">
-          <DashboardMap
-            stopMonitoringData={stopMonitoringData}
-            stationPosition={stationPosition}
-            currentStopCode={stopCodeToUse}
-          />
+        <Box flex={1} p={2}>
+          <Box h="100%" borderRadius="xl" overflow="hidden">
+            {dashboardMap}
+          </Box>
         </Box>
       )}
     </Box>

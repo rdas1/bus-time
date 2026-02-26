@@ -250,6 +250,8 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
   const [stopMonitoringData, setStopMonitoringData] = useState<Record<string, Arrival[]>>({} as Record<string, Arrival[]>);
   const [secondsUntilRefresh, setSecondsUntilRefresh] = useState(30);
   const lastFetchTimeRef = useRef<number>(Date.now());
+  const [nearbyStops, setNearbyStops] = useState<NearbyStop[]>([]);
+  const [nearbyArrivals, setNearbyArrivals] = useState<Record<string, Record<string, Arrival[]>>>({});
 
   // Use the stopcode from props or fallback to a default value
   const stopCodeToUse = stopcode || "402506";
@@ -308,7 +310,58 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
     [stopInfo.lat, stopInfo.lon]
   );
 
-  console.warn("stopInfo: ", stopInfo);
+  useEffect(() => {
+    if (!stationPosition) return;
+    getNearbyStops(stationPosition[0], stationPosition[1]).then(setNearbyStops);
+  }, [stationPosition]);
+
+  useEffect(() => {
+    const otherStops = nearbyStops.filter(s => s.code !== stopCodeToUse);
+    if (otherStops.length === 0) return;
+    const fetchNearbyArrivals = async () => {
+      const results = await Promise.all(
+        otherStops.map(async stop => {
+          try {
+            const data = await getStopMonitoring(stop.code);
+            return [stop.code, parseStopMonitoringResponse(data)] as const;
+          } catch {
+            return [stop.code, {} as Record<string, Arrival[]>] as const;
+          }
+        })
+      );
+      setNearbyArrivals(Object.fromEntries(results));
+    };
+    fetchNearbyArrivals();
+    const id = setInterval(fetchNearbyArrivals, 30000);
+    return () => clearInterval(id);
+  }, [nearbyStops, stopCodeToUse]);
+
+  const approxDistanceM = (lat1: number, lon1: number, lat2: number, lon2: number): number => {
+    const dLat = (lat2 - lat1) * 111000;
+    const dLon = (lon2 - lon1) * Math.cos(lat1 * Math.PI / 180) * 111000;
+    return Math.sqrt(dLat ** 2 + dLon ** 2);
+  };
+
+  // Build a minimal RouteInfo[] from an arrivals record, sorted by soonest first
+  const routesFromArrivals = (arrivals: Record<string, Arrival[]>): RouteInfo[] =>
+    Object.entries(arrivals)
+      .sort(([, a], [, b]) => {
+        const aTime = a[0]?.arrivalTime;
+        const bTime = b[0]?.arrivalTime;
+        if (!aTime && !bTime) return 0;
+        if (!aTime) return 1;
+        if (!bTime) return -1;
+        return new Date(aTime).getTime() - new Date(bTime).getTime();
+      })
+      .map(([shortName]) => ({ id: shortName, shortName, longName: '', description: '', destination: '' } as RouteInfo));
+
+  const sortedNearbyStops = nearbyStops
+    .filter(s => s.code !== stopCodeToUse)
+    .sort((a, b) => {
+      if (!stationPosition) return 0;
+      const [lat, lon] = stationPosition;
+      return approxDistanceM(lat, lon, a.lat, a.lon) - approxDistanceM(lat, lon, b.lat, b.lon);
+    });
 
   const dashboardMap = (
     <DashboardMap
@@ -347,6 +400,22 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
         <StopCardsList routes={stopInfo.routes} arrivalsData={stopMonitoringData} preopenedRoute={preopenedRoute} stopInfo={stopInfo} />
         <LaterArrivalsSection routes={stopInfo.routes} arrivalsData={stopMonitoringData} stopInfo={stopInfo} />
         <AlertsSection arrivalsData={stopMonitoringData} />
+
+        {sortedNearbyStops.map(stop => {
+          const arrivals = nearbyArrivals[stop.code];
+          if (!arrivals || Object.keys(arrivals).length === 0) return null;
+          const nearbyStopInfo: StopInfo = { id: stop.id, name: stop.name, routes: [], lat: stop.lat, lon: stop.lon };
+          return (
+            <Box key={stop.code} mt={2}>
+              <StopLabel name={stop.name} />
+              <StopCardsList
+                routes={routesFromArrivals(arrivals)}
+                arrivalsData={arrivals}
+                stopInfo={nearbyStopInfo}
+              />
+            </Box>
+          );
+        })}
       </Box>
 
       {/* RIGHT: map, desktop only */}

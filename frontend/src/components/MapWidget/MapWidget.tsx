@@ -172,7 +172,7 @@ const MapWidget: FC<MapWidgetProps> = ({ stationPosition = [40.7128, -74.006], a
   const stationAndBusPositions: LatLngTuple[] = [stationPosition, rawNextBusPosition];
 
   return (
-    <Box h={72}>
+    <Box h={72} borderRadius="xl" overflow="hidden">
       <MapContainer center={stationPosition} zoomControl={false} style={{ height: '100%', width: '100%' }}>
         <TileLayer url={tileLayerUrl} attribution={tileLayerAttribution} />
         <Marker position={stationPosition} icon={createStationIcon()}>

@@ -205,7 +205,15 @@ const DashboardMap: FC<DashboardMapProps> = ({ stopMonitoringData, stationPositi
           ))
         )}
         <MapBoundsSetter positions={allPositions} />
-        <MapCenterTracker onCenterChange={(lat, lon) => getNearbyStops(lat, lon).then(setNearbyStops)} />
+        <MapCenterTracker onCenterChange={async (lat, lon) => {
+          const stops = await getNearbyStops(lat, lon);
+          setNearbyStops(stops);
+          if (stops.length === 0) return;
+          const nearest = stops.reduce((best, s) =>
+            Math.hypot(s.lat - lat, s.lon - lon) < Math.hypot(best.lat - lat, best.lon - lon) ? s : best
+          );
+          if (nearest.code !== currentStopCode) navigate(`/${nearest.code}`);
+        }} />
       </MapContainer>
     </Box>
   );

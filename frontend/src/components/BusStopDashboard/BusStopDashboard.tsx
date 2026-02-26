@@ -242,6 +242,30 @@ const parseStopMonitoringResponse = (apiData): Record<string, Arrival[]> => {
   return parsed;
 }
 
+// ---------------------------------------------------------------------------
+// In-memory arrivals cache
+// ---------------------------------------------------------------------------
+const CACHE_TTL_MS = 30_000;
+
+interface CacheEntry {
+  data: Record<string, Arrival[]>;
+  fetchedAt: number;
+}
+
+const stopArrivalsCache: Record<string, CacheEntry> = {};
+
+const getCachedArrivals = async (stopCode: string): Promise<Record<string, Arrival[]>> => {
+  const cached = stopArrivalsCache[stopCode];
+  if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
+    return cached.data;
+  }
+  const raw = await getStopMonitoring(stopCode);
+  const parsed = parseStopMonitoringResponse(raw);
+  stopArrivalsCache[stopCode] = { data: parsed, fetchedAt: Date.now() };
+  return parsed;
+};
+// ---------------------------------------------------------------------------
+
 const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopenedRoute }) => {
 
   const [stopInfo, setStopInfo] = useState<StopInfo>({} as StopInfo);
@@ -278,10 +302,9 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
 
   useEffect(() => {
     const fetchStopMonitoringData = async () => {
-      console.log("Fetching arrivals data...")
       try {
-        const data = await getStopMonitoring(stopCodeToUse);
-        setStopMonitoringData(parseStopMonitoringResponse(data));
+        const data = await getCachedArrivals(stopCodeToUse);
+        setStopMonitoringData(data);
       } catch (error) {
         console.error("Failed to fetch stop monitoring data:", error);
       }
@@ -322,8 +345,8 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
       const results = await Promise.all(
         otherStops.map(async stop => {
           try {
-            const data = await getStopMonitoring(stop.code);
-            return [stop.code, parseStopMonitoringResponse(data)] as const;
+            const data = await getCachedArrivals(stop.code);
+            return [stop.code, data] as const;
           } catch {
             return [stop.code, {} as Record<string, Arrival[]>] as const;
           }

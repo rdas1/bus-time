@@ -1,5 +1,5 @@
 import { Box, Text, useBreakpointValue } from '@chakra-ui/react';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import styles from './BusStopDashboard.module.scss';
 import { useParams } from 'react-router-dom';
 import StopLabel from '../StopLabel/StopLabel';
@@ -60,6 +60,27 @@ export interface Arrival {
   serviceAlerts?: AlertInfo[];
 }
 
+
+export interface NearbyStop {
+  id: string;
+  code: string;
+  name: string;
+  lat: number;
+  lon: number;
+}
+
+export const getNearbyStops = async (lat: number, lon: number): Promise<NearbyStop[]> => {
+  try {
+    const response = await axios.get(`${REACT_APP_API_BASE_URL}/api/stops/nearby`, {
+      params: { lat, lon },
+    });
+    const list: any[] = response.data?.data?.stops ?? [];
+    return list.map(s => ({ id: s.id, code: s.code, name: s.name, lat: s.lat, lon: s.lon }));
+  } catch (err) {
+    console.error('[getNearbyStops] Error:', err);
+    return [];
+  }
+};
 
 export const getStopName = (stopcode: string): string => {
   // Mock function to get the stop name based on the stop code
@@ -282,6 +303,11 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
 
   const isDesktop = useBreakpointValue({ base: false, md: true });
 
+  const stationPosition = useMemo<[number, number] | undefined>(
+    () => stopInfo.lat && stopInfo.lon ? [stopInfo.lat, stopInfo.lon] : undefined,
+    [stopInfo.lat, stopInfo.lon]
+  );
+
   console.warn("stopInfo: ", stopInfo);
   return (
     <Box
@@ -310,9 +336,8 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
         <Box flex={1} overflow="hidden" position="relative">
           <DashboardMap
             stopMonitoringData={stopMonitoringData}
-            stationPosition={
-              stopInfo.lat && stopInfo.lon ? [stopInfo.lat, stopInfo.lon] : undefined
-            }
+            stationPosition={stationPosition}
+            currentStopCode={stopCodeToUse}
           />
         </Box>
       )}

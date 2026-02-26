@@ -1,5 +1,5 @@
 import requests
-from constants import STOP_MONITORING_URL, OPERATOR_REF, MTA_API_VERSION, MINIMUM_STOP_VISITS_PER_LINE, STOPS_ALONG_ROUTE_URL, STOP_STATIC_INFO_URL
+from constants import STOP_MONITORING_URL, OPERATOR_REF, MTA_API_VERSION, MINIMUM_STOP_VISITS_PER_LINE, STOPS_ALONG_ROUTE_URL, STOP_STATIC_INFO_URL, STOPS_FOR_LOCATION_URL
 import os
 
 MTA_API_KEY = os.getenv("MTA_API_KEY")
@@ -59,6 +59,19 @@ def get_stop_monitoring(stop_id, route_id=None, direction_id=None):
         return response.json()
     else:
         return {"error": "Failed to fetch data", "status_code": response.status_code} 
+
+def get_stops_for_location(lat, lon, radius=500):
+    params = {
+        'key': MTA_API_KEY,
+        'lat': lat,
+        'lon': lon,
+        'radius': radius,
+    }
+    response = requests.get(STOPS_FOR_LOCATION_URL, params=params)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        return {"error": "Failed to fetch data", "status_code": response.status_code}
 
 def get_data():
     # Placeholder for data-fetching logic

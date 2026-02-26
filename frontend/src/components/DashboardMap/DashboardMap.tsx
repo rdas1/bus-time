@@ -1,10 +1,11 @@
 import React, { FC, useEffect, useRef, useState } from 'react';
 import { Box } from '@chakra-ui/react';
-import { MapContainer, TileLayer, Marker, Popup, Polyline, useMap } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, Polyline, CircleMarker, Tooltip, useMap, useMapEvents } from 'react-leaflet';
+import { useNavigate } from 'react-router-dom';
 import L, { LatLngTuple } from 'leaflet';
 import { DirectionsBusFilledRounded as BusIcon } from '@mui/icons-material';
 import ReactDOMServer from 'react-dom/server';
-import { Arrival, getPolylinesAlongRoute } from '../BusStopDashboard/BusStopDashboard';
+import { Arrival, getPolylinesAlongRoute, getNearbyStops, NearbyStop } from '../BusStopDashboard/BusStopDashboard';
 import { createStationIcon } from '../MapWidget/MapWidget';
 import { getRouteColor } from '../../utils/routeColors';
 
@@ -43,15 +44,33 @@ const MapBoundsSetter: FC<{ positions: LatLngTuple[] }> = ({ positions }) => {
   return null;
 };
 
+const MapCenterTracker: FC<{ onCenterChange: (lat: number, lon: number) => void }> = ({ onCenterChange }) => {
+  useMapEvents({
+    moveend: (e) => {
+      const { lat, lng } = e.target.getCenter();
+      onCenterChange(lat, lng);
+    },
+  });
+  return null;
+};
+
 interface DashboardMapProps {
   stopMonitoringData: Record<string, Arrival[]>;
   stationPosition?: [number, number];
+  currentStopCode?: string;
 }
 
 const ANIM_DURATION = 1500; // ms
 
-const DashboardMap: FC<DashboardMapProps> = ({ stopMonitoringData, stationPosition }) => {
+const DashboardMap: FC<DashboardMapProps> = ({ stopMonitoringData, stationPosition, currentStopCode }) => {
+  const navigate = useNavigate();
   const [routePolylines, setRoutePolylines] = useState<Record<string, LatLngTuple[][]>>({});
+  const [nearbyStops, setNearbyStops] = useState<NearbyStop[]>([]);
+
+  useEffect(() => {
+    if (!stationPosition) return;
+    getNearbyStops(stationPosition[0], stationPosition[1]).then(setNearbyStops);
+  }, [stationPosition]);
 
   const [displayPositions, setDisplayPositions] = useState<Record<string, LatLngTuple>>({});
   const displayPositionsRef = useRef<Record<string, LatLngTuple>>({});
@@ -117,7 +136,24 @@ const DashboardMap: FC<DashboardMapProps> = ({ stopMonitoringData, stationPositi
   ];
 
   return (
-    <Box h="100%" w="100%">
+    <Box h="100%" w="100%" position="relative">
+      {/* Crosshair at map center */}
+      <Box
+        position="absolute"
+        top="50%"
+        left="50%"
+        transform="translate(-50%, -50%)"
+        pointerEvents="none"
+        zIndex={1000}
+      >
+        <svg width="24" height="24" viewBox="0 0 24 24" style={{ filter: 'drop-shadow(0 0 2px white)' }}>
+          <line x1="12" y1="2"  x2="12" y2="9"  stroke="#222" strokeWidth="1.5" strokeLinecap="round" />
+          <line x1="12" y1="15" x2="12" y2="22" stroke="#222" strokeWidth="1.5" strokeLinecap="round" />
+          <line x1="2"  y1="12" x2="9"  y2="12" stroke="#222" strokeWidth="1.5" strokeLinecap="round" />
+          <line x1="15" y1="12" x2="22" y2="12" stroke="#222" strokeWidth="1.5" strokeLinecap="round" />
+          <circle cx="12" cy="12" r="2" fill="#222" />
+        </svg>
+      </Box>
       <MapContainer
         center={stationPosition ?? [40.7580, -73.9855]}
         zoom={14}
@@ -125,6 +161,20 @@ const DashboardMap: FC<DashboardMapProps> = ({ stopMonitoringData, stationPositi
         style={{ height: '100%', width: '100%' }}
       >
         <TileLayer url={tileLayerUrl} attribution={tileLayerAttribution} />
+        {nearbyStops
+          .filter(stop => stop.code !== currentStopCode)
+          .map(stop => (
+            <CircleMarker
+              key={stop.id}
+              center={[stop.lat, stop.lon]}
+              radius={7}
+              pathOptions={{ color: '#444', fillColor: 'white', fillOpacity: 1, weight: 2 }}
+              eventHandlers={{ click: () => navigate(`/${stop.code}`) }}
+            >
+              <Tooltip direction="top" offset={[0, -8]}>{stop.name}</Tooltip>
+            </CircleMarker>
+          ))
+        }
         {stationPosition && (
           <Marker position={stationPosition} icon={createStationIcon()}>
             <Popup>Your stop</Popup>
@@ -147,6 +197,7 @@ const DashboardMap: FC<DashboardMapProps> = ({ stopMonitoringData, stationPositi
           ))
         )}
         <MapBoundsSetter positions={allPositions} />
+        <MapCenterTracker onCenterChange={(lat, lon) => getNearbyStops(lat, lon).then(setNearbyStops)} />
       </MapContainer>
     </Box>
   );

@@ -381,8 +381,10 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
     >
       {/* MOBILE: map above cards, fixed height */}
       {!isDesktop && (
-        <Box h="250px" flexShrink={0} position="relative">
-          {dashboardMap}
+        <Box h="250px" flexShrink={0} p={2}>
+          <Box h="100%" borderRadius="xl" overflow="hidden">
+            {dashboardMap}
+          </Box>
         </Box>
       )}
 
@@ -420,8 +422,10 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
 
       {/* RIGHT: map, desktop only */}
       {isDesktop && (
-        <Box flex={1} overflow="hidden" position="relative">
-          {dashboardMap}
+        <Box flex={1} p={2}>
+          <Box h="100%" borderRadius="xl" overflow="hidden">
+            {dashboardMap}
+          </Box>
         </Box>
       )}
     </Box>

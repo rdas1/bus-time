@@ -69,13 +69,26 @@ export interface NearbyStop {
   lon: number;
 }
 
+const CACHE_TTL_MS = 30_000;
+
+interface NearbyStopsCacheEntry {
+  stops: NearbyStop[];
+  fetchedAt: number;
+}
+const nearbyStopsCache: Record<string, NearbyStopsCacheEntry> = {};
+
 export const getNearbyStops = async (lat: number, lon: number): Promise<NearbyStop[]> => {
+  const key = `${lat.toFixed(3)},${lon.toFixed(3)}`;
+  const cached = nearbyStopsCache[key];
+  if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
+    return cached.stops;
+  }
   try {
-    const response = await axios.get(`${REACT_APP_API_BASE_URL}/api/stops/nearby`, {
-      params: { lat, lon },
-    });
+    const response = await axios.get(`${REACT_APP_API_BASE_URL}/api/stops/nearby`, { params: { lat, lon } });
     const list: any[] = response.data?.data?.stops ?? [];
-    return list.map(s => ({ id: s.id, code: s.code, name: s.name, lat: s.lat, lon: s.lon }));
+    const stops = list.map(s => ({ id: s.id, code: s.code, name: s.name, lat: s.lat, lon: s.lon }));
+    nearbyStopsCache[key] = { stops, fetchedAt: Date.now() };
+    return stops;
   } catch (err) {
     console.error('[getNearbyStops] Error:', err);
     return [];
@@ -245,24 +258,34 @@ const parseStopMonitoringResponse = (apiData): Record<string, Arrival[]> => {
 // ---------------------------------------------------------------------------
 // In-memory arrivals cache
 // ---------------------------------------------------------------------------
-const CACHE_TTL_MS = 30_000;
-
 interface CacheEntry {
   data: Record<string, Arrival[]>;
   fetchedAt: number;
 }
 
 const stopArrivalsCache: Record<string, CacheEntry> = {};
+const inFlightArrivals: Record<string, Promise<Record<string, Arrival[]>>> = {};
 
 const getCachedArrivals = async (stopCode: string): Promise<Record<string, Arrival[]>> => {
   const cached = stopArrivalsCache[stopCode];
   if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
     return cached.data;
   }
-  const raw = await getStopMonitoring(stopCode);
-  const parsed = parseStopMonitoringResponse(raw);
-  stopArrivalsCache[stopCode] = { data: parsed, fetchedAt: Date.now() };
-  return parsed;
+  if (inFlightArrivals[stopCode]) {
+    return inFlightArrivals[stopCode];
+  }
+  const fetchPromise = (async () => {
+    try {
+      const raw = await getStopMonitoring(stopCode);
+      const parsed = parseStopMonitoringResponse(raw);
+      stopArrivalsCache[stopCode] = { data: parsed, fetchedAt: Date.now() };
+      return parsed;
+    } finally {
+      delete inFlightArrivals[stopCode];
+    }
+  })();
+  inFlightArrivals[stopCode] = fetchPromise;
+  return fetchPromise;
 };
 // ---------------------------------------------------------------------------
 

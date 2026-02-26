@@ -85,6 +85,7 @@ const DashboardMap: FC<DashboardMapProps> = ({ stopMonitoringData, stationPositi
   const animFromRef = useRef<Record<string, LatLngTuple>>({});
   const animStartRef = useRef<number>(0);
   const animFrameRef = useRef<number | null>(null);
+  const panDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const missingRoutes = Object.keys(stopMonitoringData).filter(r => !routePolylines[r]);
@@ -205,14 +206,18 @@ const DashboardMap: FC<DashboardMapProps> = ({ stopMonitoringData, stationPositi
           ))
         )}
         <MapBoundsSetter positions={allPositions} />
-        <MapCenterTracker onCenterChange={async (lat, lon) => {
-          const stops = await getNearbyStops(lat, lon);
-          setNearbyStops(stops);
-          if (stops.length === 0) return;
-          const nearest = stops.reduce((best, s) =>
-            Math.hypot(s.lat - lat, s.lon - lon) < Math.hypot(best.lat - lat, best.lon - lon) ? s : best
-          );
-          if (nearest.code !== currentStopCode) navigate(`/${nearest.code}`);
+        <MapCenterTracker onCenterChange={(lat, lon) => {
+          if (panDebounceRef.current !== null) clearTimeout(panDebounceRef.current);
+          panDebounceRef.current = setTimeout(async () => {
+            panDebounceRef.current = null;
+            const stops = await getNearbyStops(lat, lon);
+            setNearbyStops(stops);
+            if (stops.length === 0) return;
+            const nearest = stops.reduce((best, s) =>
+              Math.hypot(s.lat - lat, s.lon - lon) < Math.hypot(best.lat - lat, best.lon - lon) ? s : best
+            );
+            if (nearest.code !== currentStopCode) navigate(`/${nearest.code}`);
+          }, 300);
         }} />
       </MapContainer>
     </Box>

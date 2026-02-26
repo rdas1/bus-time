@@ -1,5 +1,5 @@
 import { Box, Text, useBreakpointValue } from '@chakra-ui/react';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import styles from './BusStopDashboard.module.scss';
 import { useParams } from 'react-router-dom';
 import StopLabel from '../StopLabel/StopLabel';
@@ -303,6 +303,11 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
 
   const isDesktop = useBreakpointValue({ base: false, md: true });
 
+  const stationPosition = useMemo<[number, number] | undefined>(
+    () => stopInfo.lat && stopInfo.lon ? [stopInfo.lat, stopInfo.lon] : undefined,
+    [stopInfo.lat, stopInfo.lon]
+  );
+
   console.warn("stopInfo: ", stopInfo);
   return (
     <Box
@@ -331,9 +336,7 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
         <Box flex={1} overflow="hidden" position="relative">
           <DashboardMap
             stopMonitoringData={stopMonitoringData}
-            stationPosition={
-              stopInfo.lat && stopInfo.lon ? [stopInfo.lat, stopInfo.lon] : undefined
-            }
+            stationPosition={stationPosition}
             currentStopCode={stopCodeToUse}
           />
         </Box>

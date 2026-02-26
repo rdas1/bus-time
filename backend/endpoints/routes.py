@@ -1,5 +1,5 @@
 from flask import Blueprint, jsonify, request
-from utils.mta_data_utils import get_data, get_stop_monitoring, get_stop_info, get_stops_along_route, get_stops_for_location, get_all_stops
+from utils.mta_data_utils import get_data, get_stop_monitoring, get_stop_info, get_stops_along_route, get_stops_for_location
 
 api_bp = Blueprint('api', __name__)
 
@@ -22,11 +22,6 @@ def get_static_stop_info(stop_id):
 def get_static_stops_along_route(route_id):
     # data = {'message': 'Hello from Flask!'}
     data = get_stops_along_route(route_id, True)
-    return jsonify(data)
-
-@api_bp.route('/api/stops/all', methods=['GET'])
-def get_all_stops_route():
-    data = get_all_stops()
     return jsonify(data)
 
 @api_bp.route('/api/stops/nearby', methods=['GET'])

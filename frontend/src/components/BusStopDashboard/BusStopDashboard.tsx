@@ -69,43 +69,7 @@ export interface NearbyStop {
   lon: number;
 }
 
-// ---------------------------------------------------------------------------
-// All-stops prefetch cache — loaded once in the background on startup
-// ---------------------------------------------------------------------------
-let allStopsCache: NearbyStop[] | null = null;
-let allStopsLoading = false;
-
-export const loadAllStops = async (): Promise<void> => {
-  if (allStopsCache !== null || allStopsLoading) return;
-  allStopsLoading = true;
-  try {
-    const response = await axios.get(`${REACT_APP_API_BASE_URL}/api/stops/all`);
-    const list: any[] = response.data?.data?.stops ?? [];
-    allStopsCache = list.map(s => ({ id: s.id, code: s.code, name: s.name, lat: s.lat, lon: s.lon }));
-  } catch (err) {
-    console.error('[loadAllStops] Error:', err);
-  } finally {
-    allStopsLoading = false;
-  }
-};
-
-const DEG_TO_M = 111_000;
-const NEARBY_RADIUS_M = 500;
-
-const filterStopsNearby = (lat: number, lon: number): NearbyStop[] => {
-  const cosLat = Math.cos(lat * Math.PI / 180);
-  return (allStopsCache ?? []).filter(s => {
-    const dLat = (s.lat - lat) * DEG_TO_M;
-    const dLon = (s.lon - lon) * DEG_TO_M * cosLat;
-    return Math.hypot(dLat, dLon) <= NEARBY_RADIUS_M;
-  });
-};
-// ---------------------------------------------------------------------------
-
 export const getNearbyStops = async (lat: number, lon: number): Promise<NearbyStop[]> => {
-  if (allStopsCache) {
-    return filterStopsNearby(lat, lon);
-  }
   try {
     const response = await axios.get(`${REACT_APP_API_BASE_URL}/api/stops/nearby`, {
       params: { lat, lon },
@@ -315,9 +279,6 @@ const BusStopDashboard: React.FC<BusStopDashboardProps> = ({ stopcode, preopened
 
   // Use the stopcode from props or fallback to a default value
   const stopCodeToUse = stopcode || "402506";
-
-  // Kick off all-stops background prefetch once on mount
-  useEffect(() => { loadAllStops(); }, []);
 
   // Fetch stop info when the component mounts
   useEffect(() => {
